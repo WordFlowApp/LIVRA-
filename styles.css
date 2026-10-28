@@ -117,3 +117,23 @@ footer{padding:5px 10px calc(5px + env(safe-area-inset-bottom));font-size:10px}
  #recording .transcript-preview{max-height:60px}
  #recording .transcript-edit{min-height:48px;max-height:68px}
 }
+
+
+/* v9 direction: deep-blue full-screen theme */
+:root{--ink:#f4f7ff;--muted:#c1cce3;--line:#244779;--surface:#0d2854}
+html,body{background:#061a3b!important;color:#f4f7ff}
+body{background:radial-gradient(ellipse at 50% -12%,#173e82 0,transparent 55%),#061a3b!important}
+.topbar{background:#071e43!important;color:#fff;border-bottom:1px solid #244779;box-shadow:none}
+main{background:transparent}
+.screen{background:#0b2450;border:1px solid #244779;box-shadow:0 12px 32px rgba(0,0,0,.18)}
+.screen h1,.screen h2,.screen strong{color:#fff}
+.screen .lead,.screen .small-note,.screen .muted{color:#c1cce3}
+.transcript-preview,.transcript-edit,.book-page,.recording-card,.notice{background:#102d5c!important;color:#f4f7ff;border-color:#2a4d82}
+.transcript-preview p,.book-page p,.recording-card span{color:#e0e8fa}
+.title-input{color:#fff;border-bottom-color:#6e9cff}
+.voice-select{background:#102d5c;color:#fff;border-color:#2a4d82}
+.secondary{background:#173b75;color:#fff;border-color:#315a9a}
+#transcribeStatus{background:#122f60;color:#d7e2ff}
+footer{background:#061a3b;color:#a9bbdc;border-color:#244779}
+.link-button{color:#8db4ff}
+.danger{color:#ffaaa8}
