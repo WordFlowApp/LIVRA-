@@ -1,1 +1,21 @@
-{"id":"./","name":"LIVRA — Tu voz, tu libro","short_name":"LIVRA","description":"Grabá tu historia y convertí tu voz en un libro.","lang":"es-AR","start_url":"./","scope":"./","display":"standalone","orientation":"portrait","background_color":"#ffffff","theme_color":"#0866f5","icons":[{"src":"./icons/livra.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "id": "./",
+  "name": "LIVRA — Tu voz, tu historia, tu libro",
+  "short_name": "LIVRA",
+  "description": "Grabá tu historia, transcribí tu voz a texto y convertí el texto en un libro.",
+  "lang": "es-AR",
+  "start_url": "./?v=5",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0866f5",
+  "icons": [
+    {
+      "src": "./icons/livra.svg?v=5",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
