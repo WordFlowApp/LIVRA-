@@ -1,11 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-<title id="title">LIVRA</title><desc id="desc">Logo azul de LIVRA con un libro abierto amarillo en el centro.</desc>
-<rect width="512" height="512" rx="116" fill="#0866f5"/>
-<g fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="138" font-weight="800" text-anchor="middle">
-<text x="112" y="320">L</text><text x="205" y="320">I</text><text x="356" y="320">R</text><text x="438" y="320">A</text></g>
-<g stroke="#ffffff" stroke-width="9" stroke-linejoin="round">
-<path d="M228 198 Q255 180 282 198 L282 324 Q255 307 228 324 Z" fill="#ffd52a"/>
-<path d="M290 198 Q317 180 344 198 L344 324 Q317 307 290 324 Z" fill="#ffd52a"/>
-<path d="M286 196 V322" fill="none" stroke-width="6"/>
+<title id="title">LIVRA</title><desc id="desc">Logo LIVRA azul circular con letras blancas y libro abierto amarillo en el centro.</desc>
+<circle cx="256" cy="256" r="252" fill="#0866f5"/>
+<g fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="148" font-weight="800">
+<path d="M54 194h30v102h42v27H54z"/>
+<path d="M132 194h30v129h-30z"/>
+<path d="M350 194h51c35 0 53 18 53 46 0 21-10 35-28 42l32 41h-37l-27-36h-14v36h-30zm30 26v42h19c15 0 24-7 24-21s-9-21-24-21z"/>
+<path d="M462 323l47-129h-31l-47 129h31z" opacity="0"/>
+<path d="M414 323l47-129h29l47 129h-32l-8-25h-44l-8 25zm48-51h28l-14-43z" transform="translate(-8 0)"/>
+</g>
+<g stroke="#ffffff" stroke-width="8" stroke-linejoin="round">
+<path d="M190 196 Q218 197 249 216 L249 318 Q218 294 190 290 Z" fill="#ffdf35"/>
+<path d="M258 216 Q289 197 317 196 L317 290 Q289 294 258 318 Z" fill="#ffdf35"/>
+<path d="M253 207V320" fill="none" stroke-width="6"/>
 </g>
 </svg>
