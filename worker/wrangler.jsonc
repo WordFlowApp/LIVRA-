@@ -1,0 +1,8 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "livra-transcription",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-28",
+  "workers_dev": true,
+  "ai": { "binding": "AI" }
+}
