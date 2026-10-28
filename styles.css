@@ -231,3 +231,5 @@ footer{font-size:12px}
 .book-images-preview img{width:100%;height:140px;object-fit:cover;border-radius:12px;border:1px solid #4267a1}
 #book .book-page{background:#102d5c;border-color:#31548a}
 #book .book-page p{color:#f4f7ff;font-size:20px}
+
+#addMoreToBook{min-height:60px;font-size:clamp(19px,5vw,22px);margin-top:12px;background:#0866f5;color:#fff}
