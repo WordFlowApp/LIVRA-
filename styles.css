@@ -41,3 +41,6 @@ h1{font-size:clamp(24px,6vw,29px);margin:8px 0;letter-spacing:-.5px}
 .audio{margin:4px 0}
 footer{padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
 @media(max-height:760px){main{padding-top:8px;padding-bottom:8px}.screen{min-height:calc(100svh - 112px)}.hero-logo{width:108px;margin:0 auto 5px}.small-logo{width:42px;height:42px;margin-bottom:4px}h1{font-size:23px;margin:5px 0}.lead{font-size:14px;margin:3px auto 9px}.small-note{margin-top:7px}.timer{font-size:36px}.book-page{min-height:28svh;max-height:33svh}}
+
+#transcribeAudio{margin-top:10px;font-size:18px;min-height:52px}
+#transcribeStatus{font-size:12px;line-height:1.35;margin:7px 0 0}
