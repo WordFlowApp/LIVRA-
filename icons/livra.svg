@@ -1,15 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
-<title id="title">LIVRA — libro abierto integrado en la V</title>
-<circle cx="256" cy="256" r="250" fill="#0866f5"/>
-<g fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="150" font-weight="800">
-  <text x="43" y="326">L</text>
-  <text x="132" y="326">I</text>
-  <text x="290" y="326">R</text>
-  <text x="385" y="326">A</text>
-</g>
-<g stroke="#fff" stroke-width="7" stroke-linejoin="round">
-  <path d="M190 211 Q218 194 242 207 L242 315 Q215 302 190 315 Z" fill="#ffd52a"/>
-  <path d="M250 207 Q276 194 303 211 L303 315 Q277 302 250 315 Z" fill="#ffd52a"/>
-  <path d="M246 207 L246 315" fill="none" stroke-width="5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">LIVRA</title><desc id="desc">Logo azul de LIVRA con un libro abierto amarillo en el centro.</desc>
+<rect width="512" height="512" rx="116" fill="#0866f5"/>
+<g fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-size="138" font-weight="800" text-anchor="middle">
+<text x="112" y="320">L</text><text x="205" y="320">I</text><text x="356" y="320">R</text><text x="438" y="320">A</text></g>
+<g stroke="#ffffff" stroke-width="9" stroke-linejoin="round">
+<path d="M228 198 Q255 180 282 198 L282 324 Q255 307 228 324 Z" fill="#ffd52a"/>
+<path d="M290 198 Q317 180 344 198 L344 324 Q317 307 290 324 Z" fill="#ffd52a"/>
+<path d="M286 196 V322" fill="none" stroke-width="6"/>
 </g>
 </svg>
