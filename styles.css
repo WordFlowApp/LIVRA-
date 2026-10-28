@@ -210,3 +210,24 @@ footer{font-size:12px}
  .motivation-card p:not(.motivation-kicker){font-size:17px;margin-bottom:10px}
  .motivation-cta{min-height:52px;font-size:18px}
 }
+
+
+/* v12: simple guided flow for building one book from many recordings and photos */
+#saved h1,#builder h1,#book h1{font-size:clamp(28px,7vw,36px)}
+#openBuilder{min-height:64px;font-size:clamp(20px,5.5vw,24px);margin:8px 0 14px}
+.recording-card{padding:16px;gap:10px}
+.recording-card strong{font-size:20px;line-height:1.25;color:#fff}
+.recording-card span{font-size:16px;line-height:1.3;color:#d7e4ff}
+.recording-card button{min-height:52px;font-size:18px;background:#ffdf48;color:#08224a;border-radius:14px}
+.builder-label,.builder-instruction{font-size:20px;font-weight:800;color:#fff;line-height:1.25;margin:14px 0 8px;text-align:left;width:100%}
+#builder .title-input{font-size:23px;color:#fff;background:#102d5c;border:1px solid #4267a1;border-radius:14px;margin:4px 0 8px}
+.builder-audio-option{display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:14px;border:2px solid #4267a1;border-radius:16px;background:#102d5c;color:#fff;font-size:18px;line-height:1.3}
+.builder-audio-option input{width:28px;height:28px;flex:0 0 28px;accent-color:#ffdf48}
+.upload-button{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border:2px solid #ffdf48;border-radius:16px;background:#ffdf48;color:#08224a;font-size:20px;font-weight:900;padding:12px}
+#createBook{min-height:66px;font-size:22px;margin-top:14px}
+#builderBack{font-size:18px;min-height:54px}
+#imageStatus{font-size:16px;line-height:1.35}
+.book-images-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;margin:10px 0}
+.book-images-preview img{width:100%;height:140px;object-fit:cover;border-radius:12px;border:1px solid #4267a1}
+#book .book-page{background:#102d5c;border-color:#31548a}
+#book .book-page p{color:#f4f7ff;font-size:20px}
