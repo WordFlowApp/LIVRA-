@@ -1,4 +1,6 @@
 const $=id=>document.getElementById(id);
+// Set this only after the Cloudflare Worker is deployed. Keep API keys out of this public app.
+const LIVRA_API_URL = "";
 const screens=["home","recording","saved","book"];
 let recorder=null,stream=null,chunks=[],timer=null,seconds=0,currentBlob=null,currentUrl=null,recordings=[],recognition=null,recognitionWanted=false,finalTranscript="",activeBook=null,pageIndex=0,bookPages=[];
 function show(id){screens.forEach(s=>$(s).classList.toggle("active",s===id));if(id==="saved")render()}
@@ -31,4 +33,31 @@ $("speakPage").onclick=()=>{if(!("speechSynthesis"in window)){toast("Este navega
 $("shareBook").onclick=async()=>{const title=$("bookTitle").value||"Mi historia";const text=title+"\n\n"+bookPages.map(p=>p.heading+"\n"+p.body).join("\n\n");try{if(navigator.share)await navigator.share({title,text});else if(navigator.clipboard){await navigator.clipboard.writeText(text);toast("Texto del libro copiado para compartir")}else toast("Tu navegador no permite compartir desde aquí")}catch(e){if(e.name!=="AbortError")toast("No se pudo compartir el libro")}};
 $("listenRecording").onclick=async()=>{try{let item=activeBook;if(!item){const items=await all();item=items[items.length-1]}if(!item?.blob){toast("No hay audio original guardado");return}if(currentUrl)URL.revokeObjectURL(currentUrl);currentUrl=URL.createObjectURL(item.blob);$("audioPlayer").src=currentUrl;$("audioPlayer").classList.remove("hidden");await $("audioPlayer").play()}catch(e){toast("No se pudo reproducir el audio")}};
 async function render(){const list=$("recordingList");list.replaceChildren();try{recordings=(await all()).sort((a,b)=>b.id-a.id);if(!recordings.length){list.textContent="Todavía no guardaste historias.";return}for(const item of recordings){const card=document.createElement("div");card.className="recording-card";const title=document.createElement("strong");title.textContent=item.title||"Mi historia";const meta=document.createElement("span");meta.textContent=new Date(item.createdAt).toLocaleString("es-AR")+" · "+fmt(item.duration||0);const open=document.createElement("button");open.textContent=item.transcript?"📖 Abrir libro":"▶ Abrir grabación";open.onclick=()=>openBook(item);const download=document.createElement("button");download.textContent="↓ Descargar audio";download.onclick=()=>{const u=URL.createObjectURL(item.blob),a=document.createElement("a");a.href=u;a.download="livra-audio-"+item.id+".webm";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};card.append(title,meta,open,download);list.append(card)}}catch(e){list.textContent="No se pudieron cargar las historias."}}
+
+$("transcribeAudio").onclick=async()=>{
+ const status=$("transcribeStatus");
+ const btn=$("transcribeAudio");
+ if(!currentBlob){toast("Primero grabá y detené tu historia.");return}
+ if(!LIVRA_API_URL){
+  status.textContent="El botón está preparado. Falta publicar y conectar el servicio de transcripción gratuito; todavía no se envía el audio.";
+  toast("La conexión del backend es el siguiente paso. Tu audio sigue guardado en este teléfono.");
+  return;
+ }
+ btn.disabled=true;btn.textContent="Transcribiendo…";status.textContent="Procesando el audio. Puede tardar unos segundos…";
+ try{
+  const form=new FormData();
+  form.append("audio",currentBlob,"livra-recording.webm");
+  const response=await fetch(LIVRA_API_URL.replace(/\/$/,"")+"/transcribe",{method:"POST",body:form});
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error||"No se pudo transcribir el audio.");
+  $("transcriptEdit").value=data.text||"";
+  $("liveTranscript").textContent=data.text||"No se reconoció voz.";
+  status.textContent="Transcripción completada. Revisá el texto antes de guardar.";
+  toast("¡Audio convertido a texto!");
+ }catch(error){
+  status.textContent=error.message||"No se pudo conectar con el servicio. Probá otra vez.";
+  toast("La transcripción no se pudo completar.");
+ }finally{btn.disabled=false;btn.textContent="Transcribir audio";}
+};
+
 if("serviceWorker"in navigator&&location.protocol!=="file:")addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
