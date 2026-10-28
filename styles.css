@@ -73,3 +73,47 @@ footer{background:rgba(255,255,255,.76);color:#8490a5}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(35,89,232,.32);outline-offset:3px}
 button:disabled{box-shadow:none}
 @media(max-height:760px){.screen{padding:12px 12px}.topbar{height:52px}}
+
+
+/* v8: tighter mobile layout, less vertical scrolling */
+main{padding:8px 12px 10px}
+.screen{padding:12px 12px;border-radius:22px;min-height:0}
+.hero-logo{width:clamp(96px,27vw,132px);margin:0 auto 6px}
+.screen h1{font-size:clamp(22px,5.4vw,27px);margin:5px 0}
+.screen .lead{font-size:14px;line-height:1.32;margin:3px auto 10px}
+#startRecording{min-height:48px;font-size:17px;padding:10px 14px}
+#openSaved{padding:8px 12px;font-size:15px}
+.screen .small-note{font-size:10px;line-height:1.35;margin-top:7px}
+.small-logo{width:42px;height:42px;margin:0 auto 4px}
+#recording .timer{font-size:34px;margin:2px 0}
+#recording .muted{margin:0 0 7px}
+#recording .transcript-preview{padding:8px 10px;margin-bottom:7px;max-height:72px}
+#recording .controls button{min-height:42px;font-size:15px;padding:8px 10px}
+#recording .review{margin-top:5px}
+#recording .review .lead{font-size:13px;margin:0 auto 4px}
+#recording .transcript-edit{min-height:58px;max-height:82px;padding:8px;font-size:13px}
+#transcribeAudio{margin-top:6px;min-height:42px;font-size:15px;padding:8px 12px}
+#transcribeStatus{font-size:10px;padding:4px 7px;margin:4px 0 0}
+#recording .review .secondary,#recording .review .confirm{min-height:40px;margin-top:4px;font-size:15px;padding:7px 12px}
+#recording .review .link-button{padding:5px;font-size:14px}
+#recording>.small-note{margin-top:5px}
+#saved .lead{margin-bottom:6px}
+#saved .secondary,#bookBack{min-height:42px;font-size:15px;padding:8px 12px}
+#book .book-page{min-height:25svh;max-height:30svh;padding:12px}
+#book .page-controls .secondary{min-height:36px;font-size:13px;padding:6px 10px}
+#book .book-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%}
+#book .book-actions .primary,#book .book-actions .secondary{min-height:38px;font-size:14px;padding:7px 9px}
+#book .voice-select{grid-column:1/-1;min-height:34px;font-size:13px}
+#book .audio{grid-column:1/-1}
+footer{padding:5px 10px calc(5px + env(safe-area-inset-bottom));font-size:10px}
+@media(max-height:760px){
+ .topbar{height:46px;padding:5px 12px;font-size:18px}
+ .brand-logo{width:36px;height:36px}
+ main{padding:5px 10px 6px}
+ .screen{padding:8px 10px}
+ .hero-logo{width:90px;margin:0 auto 3px}
+ .screen h1{font-size:21px;margin:3px 0}
+ .screen .lead{font-size:13px;margin:2px auto 7px}
+ #recording .transcript-preview{max-height:60px}
+ #recording .transcript-edit{min-height:48px;max-height:68px}
+}
