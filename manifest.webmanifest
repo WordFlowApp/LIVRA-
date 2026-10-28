@@ -4,18 +4,18 @@
   "short_name": "LIVRA",
   "description": "Grabá tu historia, transcribí tu voz a texto y convertí el texto en un libro.",
   "lang": "es-AR",
-  "start_url": "./?v=7",
+  "start_url": "./?v=8",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#0866f5",
+  "theme_color": "#2359e8",
   "icons": [
     {
-      "src": "./icons/livra.svg?v=7",
+      "src": "./icons/livra.svg?v=8",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
