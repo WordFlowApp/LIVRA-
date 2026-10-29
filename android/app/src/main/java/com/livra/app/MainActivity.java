@@ -270,11 +270,23 @@ public class MainActivity extends Activity {
     }
 
     private void sendToPage(String type, String value) {
-        String safeType = type.replace("\\", "\\\\").replace("'", "\\'");
-        String safeValue = value.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ").replace("\r", " ");
+        String callback;
+        switch (type) {
+            case "recordingStarted": callback = "LIVRAOnNativeRecordingStarted"; break;
+            case "recordingError": callback = "LIVRAOnNativeRecordingError"; break;
+            case "speechStatus": callback = "LIVRAOnNativeSpeechStatus"; break;
+            case "speechError": callback = "LIVRAOnNativeSpeechError"; break;
+            case "speechPartial": callback = "LIVRAOnNativeSpeechPartial"; break;
+            case "speechResult": callback = "LIVRAOnNativeSpeechResult"; break;
+            case "audioStart": callback = "LIVRAOnNativeAudioStart"; break;
+            case "audioChunk": callback = "LIVRAOnNativeAudioChunk"; break;
+            case "audioEnd": callback = "LIVRAOnNativeAudioEnd"; break;
+            default: callback = "LIVRAOnNativeSpeechStatus"; break;
+        }
+        String encoded = android.util.Base64.encodeToString(value.getBytes(java.nio.charset.StandardCharsets.UTF_8), android.util.Base64.NO_WRAP);
         runOnUiThread(() -> {
             if (webView != null) webView.evaluateJavascript(
-                "window.LIVRAOnNativeSpeech && window.LIVRAOnNativeSpeech('" + safeType + "','" + safeValue + "')", null);
+                "window." + callback + " && window." + callback + "(atob('" + encoded + "'))", null);
         });
     }
 
