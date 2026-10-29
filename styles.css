@@ -79,3 +79,65 @@ h1 span{color:var(--gold)}
 footer{text-align:center;color:#6f91bd;font-size:13px;padding:10px 12px calc(12px + env(safe-area-inset-bottom))}
 .hidden{display:none!important}
 @media(max-width:370px){main{padding:10px}.audio-card{grid-template-columns:38px 46px minmax(0,1fr);gap:7px;padding:10px}.audio-check{width:30px;height:30px}.play-button{width:44px;height:44px}.audio-info strong{font-size:18px}.control-button{font-size:15px}.record-controls{gap:7px}}
+
+/* v19: compact layout tuned to fit common phone screens without scrolling */
+main{padding:10px 14px 12px}
+.screen{gap:11px;min-height:calc(100svh - 102px)}
+#home{gap:15px;padding:4px 0}
+.hero-icon{width:min(43vw,188px)}
+#home h1{font-size:clamp(31px,7.2vw,43px);margin:2px 0 6px}
+.big-button{min-height:84px;padding:15px 18px;border-radius:22px;font-size:clamp(23px,6.1vw,32px)}
+.screen-heading{min-height:58px}
+.screen-heading h1{font-size:clamp(27px,6.4vw,36px)}
+.mini-icon{width:46px;height:46px}
+.mic-visual{width:min(49vw,205px);height:min(49vw,205px)}
+.timer{font-size:clamp(36px,9vw,50px)}
+.waveform{height:34px}
+.transcript-edit{min-height:82px;padding:13px;font-size:18px}
+.record-controls{gap:8px}
+.control-button{min-height:76px;font-size:clamp(15px,3.7vw,20px);gap:5px}
+.control-button span{font-size:28px}
+.subtitle{font-size:17px}
+.audio-card{padding:10px 11px;grid-template-columns:42px 50px minmax(0,1fr)}
+.audio-check{width:31px;height:31px}
+.play-button{width:46px;height:46px}
+.audio-info strong{font-size:18px}
+.audio-info span{font-size:14px}
+.selection-status{font-size:17px}
+.empty-state{padding:22px 16px}
+.empty-book{font-size:56px}
+.empty-state h2{font-size:24px;margin:9px 0}
+.empty-state p{font-size:17px}
+.book-grid{gap:12px}
+.book-cover{padding:12px 10px}
+.book-cover img{width:46px;height:46px}
+.reader-cover{min-height:205px;padding:18px}
+.reader-page{min-height:190px;padding:20px 17px}
+.reader-page h2{font-size:24px;margin:12px 0}
+.reader-page p{font-size:19px;line-height:1.6}
+footer{padding:7px 10px calc(8px + env(safe-area-inset-bottom))}
+@media(max-height:780px){
+ main{padding:7px 12px 8px}
+ .screen{gap:8px;min-height:calc(100svh - 88px)}
+ #home{gap:11px}
+ .hero-icon{width:min(37vw,150px)}
+ #home h1{font-size:clamp(28px,6.8vw,36px);margin:0 0 4px}
+ .big-button{min-height:72px;padding:12px 14px;font-size:clamp(21px,5.6vw,28px)}
+ .screen-heading{min-height:48px}
+ .screen-heading h1{font-size:clamp(25px,6vw,32px)}
+ .mini-icon{width:40px;height:40px}
+ .mic-visual{width:min(39vw,155px);height:min(39vw,155px)}
+ .timer{font-size:36px}
+ .waveform{height:27px}
+ .transcript-edit{min-height:66px;padding:10px;font-size:17px}
+ .control-button{min-height:64px;font-size:15px}
+ .control-button span{font-size:24px}
+ .subtitle{font-size:16px}
+ .audio-list{gap:7px}
+ .audio-card{padding:8px 9px}
+ .empty-state{padding:18px 14px}
+ .reader-cover{min-height:175px}
+ .reader-page{min-height:160px;padding:15px}
+ .reader-page p{font-size:18px;line-height:1.5}
+ footer{font-size:12px;padding:4px 8px calc(4px + env(safe-area-inset-bottom))}
+}
