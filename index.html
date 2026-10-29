@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#071b3d">
 <meta name="description" content="LIVRA transforma tu voz en libros.">
-<link rel="manifest" href="./manifest.webmanifest?v=19">
-<link rel="icon" href="./icons/livra.svg?v=19" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=37">
+<link rel="manifest" href="./manifest.webmanifest?v=20">
+<link rel="icon" href="./icons/livra.svg?v=20" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css?v=38">
 <title>LIVRA — Tu voz, tu libro</title>
 </head>
 <body>
 <header class="topbar"><span class="brand-mark" aria-hidden="true">L</span><strong>LIVRA</strong></header>
 <main>
-<section id="home" class="screen active">
-  <img class="hero-icon" src="./icons/livra.svg?v=19" alt="">
+<section id="home" class="screen">
+  <img class="hero-icon" src="./icons/livra.svg?v=20" alt="">
   <h1>Escribí tu libro<br><span>ahora</span></h1>
   <button id="startRecording" class="big-button record-home"><span class="button-icon">🎙</span> GRABAR</button>
   <button id="openLibrary" class="big-button library-home"><span class="button-icon">▤</span> BIBLIOTECA</button>
@@ -48,7 +48,7 @@
   <button id="audioBackHome" class="quiet-button">Volver al inicio</button>
 </section>
 
-<section id="library" class="screen">
+<section id="library" class="screen active">
   <div class="library-brand-heading"><div class="library-brand-lockup"><img src="./icons/livra.svg?v=20" alt="Logo de LIVRA"><div><h1>Mi biblioteca</h1><p id="librarySubtitle" class="subtitle">Tus historias. Tus libros. Tu mundo.</p></div></div><span class="library-brand-tag">LIVRA ORIGINALS</span></div>
   <div id="bookGrid" class="book-grid"></div>
   <div id="emptyLibrary" class="empty-state"><div class="empty-book">▤</div><h2>Acá aparecerán tus futuros libros</h2><p>Grabá tu historia, elegí tus audios y tocá ARMAR LIBRO.</p></div>
@@ -75,5 +75,5 @@
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </main>
 <footer>Tu voz. Tu historia. Tu libro.</footer>
-<script src="./app.js?v=34"></script>
+<script src="./app.js?v=35"></script>
 </body></html>
