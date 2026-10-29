@@ -141,3 +141,9 @@ footer{padding:7px 10px calc(8px + env(safe-area-inset-bottom))}
  .reader-page p{font-size:18px;line-height:1.5}
  footer{font-size:12px;padding:4px 8px calc(4px + env(safe-area-inset-bottom))}
 }
+
+/* LIVRA v21: explicit delete action for saved recordings */
+.audio-card{grid-template-columns:38px 46px minmax(0,1fr) 36px}
+.delete-audio-button{width:36px;height:40px;border:1px solid #ff8b98;border-radius:12px;background:#4a1730;color:#fff;font-size:18px;display:grid;place-items:center}
+.delete-audio-button:disabled{opacity:.55}
+@media(max-width:370px){.audio-card{grid-template-columns:30px 40px minmax(0,1fr) 32px;gap:6px}.delete-audio-button{width:32px;height:36px}}
