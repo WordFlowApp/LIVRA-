@@ -308,3 +308,13 @@ footer{flex:0 0 34px;height:34px;overflow:hidden;padding:7px 8px 4px}
 .empty-state p{font-size:clamp(19px,4.8vw,22px)}
 .transcript-edit{font-size:clamp(20px,5vw,24px);min-height:150px}
 @media(min-width:500px){.book-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+
+/* LIVRA 3.4: biblioteca visual con estantería vacía y acceso claro a publicación */
+#library{overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
+#library .empty-state{background:linear-gradient(180deg,#10284a,#0b1d37);border:1px solid #3c587d;padding:20px 14px 12px;}
+#library .empty-state .empty-book{font-size:46px;color:#e9c76a}
+#library .empty-shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end;margin:18px 0 0;padding:0 5px 9px;border-bottom:12px solid #9c7739;border-radius:2px;box-shadow:0 7px 0 #5a4024}
+#library .empty-shelf span{height:88px;border:1px solid #476184;border-radius:5px 5px 1px 1px;background:linear-gradient(90deg,#122b4c,#1a3a63 55%,#102746);box-shadow:inset 5px 0 0 #d0ae5d,inset -3px 0 0 #07152b}
+#library .amazon-button{min-height:58px;border-color:#e9c76a;color:#f5d778;font-size:17px;font-weight:900}
+#library .quiet-button{min-height:52px}
