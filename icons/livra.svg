@@ -1,13 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-<title id="title">LIVRA</title><desc id="desc">Marca LIVRA: círculo azul, letras blancas y libro abierto amarillo integrado en el nombre.</desc>
-<circle cx="256" cy="256" r="252" fill="#0866f5"/>
-<g fill="#fff" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="142">
-<text x="54" y="300" textLength="145" lengthAdjust="spacingAndGlyphs">LI</text>
-<text x="315" y="300" textLength="151" lengthAdjust="spacingAndGlyphs">RA</text>
-</g>
-<g stroke="#fff" stroke-width="9" stroke-linejoin="round">
-<path d="M204 184 Q232 184 253 202 L253 318 Q229 297 204 291 Z" fill="#ffdf35"/>
-<path d="M261 202 Q282 184 310 184 L310 291 Q285 297 261 318 Z" fill="#ffdf35"/>
-<path d="M257 197 V319" fill="none" stroke-width="6"/>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LIVRA: voz y libro">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1267f5"/><stop offset="1" stop-color="#061a3b"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe94c"/><stop offset="1" stop-color="#ffb900"/></linearGradient></defs>
+<rect x="10" y="10" width="492" height="492" rx="112" fill="url(#bg)"/>
+<path d="M78 292 Q148 276 248 324 L248 421 Q151 375 78 395 Z" fill="url(#gold)"/>
+<path d="M264 324 Q364 276 434 292 L434 395 Q361 375 264 421 Z" fill="url(#gold)"/>
+<path d="M256 326 V423" stroke="#fff5b8" stroke-width="8" stroke-linecap="round"/>
+<path d="M194 105 Q194 76 224 76 H288 Q318 76 318 105 V222 Q318 272 256 285 Q194 272 194 222 Z" fill="#fff"/>
+<path d="M213 134 H270 M213 169 H270 M213 204 H270" stroke="#1267f5" stroke-width="13" stroke-linecap="round"/>
+<path d="M174 173 Q146 193 174 216 M338 173 Q366 193 338 216" fill="none" stroke="#21d5ff" stroke-width="16" stroke-linecap="round"/>
+<path d="M146 146 Q100 193 146 242 M366 146 Q412 193 366 242" fill="none" stroke="#21d5ff" stroke-width="16" stroke-linecap="round"/>
 </svg>
