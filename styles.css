@@ -338,3 +338,67 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px soli
 #book .book-page p{font-size:24px;line-height:1.55}
 #bookTitle{font-size:27px;min-height:66px}
 @media(max-width:380px){body{font-size:20px}button,.button,.secondary,.primary,.confirm,.pill{font-size:22px!important;min-height:70px;padding:16px}#recording .transcript-edit{font-size:24px;min-height:190px}}
+
+
+/* LIVRA v17 — premium calm blue, accessible large typography */
+:root{--blue:#2d5c9c;--blue-dark:#214875;--yellow:#f0d78b;--ink:#f6f8fc;--muted:#d3deed;--line:#3b5678;--green:#3c7b64}
+*{box-sizing:border-box}
+html{font-size:22px;scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:linear-gradient(155deg,#0d2544 0%,#091b33 100%);color:#f6f8fc;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:22px;line-height:1.45;letter-spacing:.005em}
+.topbar{height:76px;padding:10px 18px;gap:14px;background:#0b203b;color:#fff;border-bottom:1px solid #314a69;font-size:28px;font-weight:800;display:flex;align-items:center}
+.brand-logo{width:54px;height:54px;object-fit:contain}
+main{width:100%;max-width:640px;margin:0 auto;padding:18px 16px 28px}
+.screen{width:100%;min-height:0;gap:18px;padding:24px 20px;background:rgba(17,43,76,.94);border:1px solid #345477;border-radius:28px;box-shadow:0 10px 28px rgba(0,0,0,.12)}
+.screen h1{margin:4px 0 10px;font-size:clamp(38px,10vw,48px);font-weight:800;line-height:1.08;letter-spacing:-.025em;text-align:center}
+.screen h2{font-size:clamp(34px,8.5vw,42px);line-height:1.12;font-weight:800;margin:0;text-align:center}
+p,.lead,.muted,.small-note{font-size:22px;line-height:1.45;color:#d3deed}
+button,.button,.secondary,.primary,.confirm,.pill,.link-button{font-family:inherit;font-size:clamp(25px,6.8vw,30px)!important;line-height:1.15;font-weight:800;min-height:78px;padding:18px 20px;border-radius:20px;letter-spacing:0;box-shadow:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid #f0d78b;outline-offset:3px}
+.primary{background:#2d5c9c;color:#fff;border:1px solid #5277a6}
+.secondary{background:#18395e;color:#fff;border:1px solid #42648b}
+.confirm{background:#3c7b64;color:#fff;border:0}
+#home{justify-content:flex-start;gap:20px;padding:24px 20px 28px}
+#home .hero-logo{display:block;width:clamp(158px,44vw,196px);height:auto;object-fit:contain;margin:0 auto 2px}
+#home h1{font-size:clamp(38px,10vw,48px);margin:0 0 2px}
+#startRecording,#openSaved,.library-button{width:100%;min-height:86px;font-size:clamp(27px,7vw,32px)!important;font-weight:850;border-radius:22px}
+#startRecording{background:#2d5c9c;color:#fff}
+.library-button{background:#f0d78b;color:#152b48;border:0}
+.motivation-card{margin-top:4px;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;background:#102b4d;border:1px solid #3b5678;border-radius:24px;padding:24px 18px}
+.motivation-sticker{font-size:56px;line-height:1;color:#f0d78b}
+.motivation-kicker{font-size:18px!important;font-weight:850;letter-spacing:.09em;color:#f0d78b!important;margin:0}
+.motivation-card h2{font-size:clamp(34px,9vw,44px)}
+.motivation-copy{font-size:25px!important;margin:0;color:#d3deed}
+#recording{gap:14px;padding:22px 18px}
+#recording h1{font-size:clamp(38px,10vw,48px);margin:0}
+#timer{font-size:clamp(52px,14vw,64px);font-weight:850;color:#f0d78b;margin:0;text-align:center}
+#recordState{font-size:23px;font-weight:800;color:#f0d78b;text-align:center;margin:0}
+#recording .transcript-edit{display:block;width:100%;min-height:clamp(230px,36vh,350px);max-height:45vh;margin:0;padding:20px;font-size:clamp(26px,7vw,32px);line-height:1.45;color:#fff;background:#0d2544;border:1px solid #49688e;border-radius:22px;resize:vertical}
+#recording .transcript-edit::placeholder{color:#d3deed;opacity:1}
+#recording .controls{gap:12px;margin:0}
+#recording .controls button{flex:1;min-height:78px;font-size:clamp(24px,6.5vw,29px)!important}
+#reviewControls{display:flex;flex-direction:column;gap:12px;margin-top:2px}
+#reviewControls.hidden{display:none!important}
+#transcribeAudio{background:#f0d78b;color:#152b48;border:0;min-height:80px;font-size:clamp(26px,7vw,31px)!important}
+#continueRecording{background:#2d5c9c;color:#fff;min-height:76px}
+#discardRecording{color:#f2b9bc;min-height:64px}
+#saveRecording{background:#3c7b64;color:#fff;min-height:80px}
+#transcribeStatus{font-size:20px;line-height:1.4;margin:0}
+#saved .lead,#builder .builder-instruction,#builder .builder-label{font-size:25px;line-height:1.4}
+#openBuilder,#createBook,#bookBack,#builderBack,#backHome,#addMoreToBook{font-size:clamp(25px,6.5vw,30px)!important;min-height:78px}
+.recording-list{gap:14px}
+.recording-card{background:#102b4d;border:1px solid #3b5678;border-radius:20px;padding:18px;gap:12px}
+.recording-card strong{font-size:25px;line-height:1.35;color:#fff}
+.recording-card span{font-size:22px;line-height:1.4;color:#d3deed}
+.builder-label,.builder-instruction{font-size:25px;line-height:1.35}
+.builder-audio-option{font-size:24px;line-height:1.4;padding:18px;background:#102b4d}
+.builder-audio-option input{width:32px;height:32px;flex-basis:32px}
+#builder .title-input{font-size:27px;padding:18px;min-height:72px}
+.upload-button{font-size:26px;min-height:78px;background:#f0d78b;color:#152b48;border:0}
+#book .book-page p{font-size:26px;line-height:1.55}
+#bookTitle{font-size:28px;min-height:72px}
+.page-controls span{font-size:24px}
+.book-actions{gap:12px}
+.book-actions button{font-size:25px!important}
+.voice-select{font-size:22px;min-height:64px}
+footer{font-size:18px;color:#b8c8dc;text-align:center;padding:18px}
+@media(max-width:380px){html{font-size:20px}.screen{padding:20px 16px;gap:16px}button,.button,.secondary,.primary,.confirm,.pill,.link-button{font-size:24px!important;min-height:72px;padding:16px}#recording .transcript-edit{font-size:25px;min-height:205px}#home .hero-logo{width:150px}}
