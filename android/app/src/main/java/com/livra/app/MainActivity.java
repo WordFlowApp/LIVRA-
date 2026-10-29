@@ -26,6 +26,7 @@ public class MainActivity extends Activity {
     private SpeechRecognizer recognizer;
     private boolean listening = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private android.webkit.PermissionRequest pendingWebPermissionRequest;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -39,9 +40,12 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public void onPermissionRequest(android.webkit.PermissionRequest request) {
                 runOnUiThread(() -> {
-                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                         request.grant(request.getResources());
-                    else request.deny();
+                    } else {
+                        pendingWebPermissionRequest = request;
+                        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO);
+                    }
                 });
             }
         });
@@ -52,12 +56,19 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO);
-        else webView.loadUrl(APP_URL);
+        webView.loadUrl(APP_URL);
     }
 
     private class SpeechBridge {
+        @JavascriptInterface public void requestMicPermission() {
+            runOnUiThread(() -> {
+                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                    notifyMicPermission(true);
+                } else {
+                    requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO);
+                }
+            });
+        }
         @JavascriptInterface public void start() { runOnUiThread(() -> startNativeRecognition()); }
         @JavascriptInterface public void stop() { runOnUiThread(() -> stopNativeRecognition()); }
     }
@@ -132,12 +143,22 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void notifyMicPermission(boolean granted) {
+        if (webView != null) webView.evaluateJavascript(
+            "window.LIVRAOnMicPermission && window.LIVRAOnMicPermission(" + granted + ")", null);
+    }
+
     @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
-        if (requestCode == REQUEST_AUDIO && results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED)
-            webView.loadUrl(APP_URL);
-        else if (requestCode == REQUEST_AUDIO)
-            Toast.makeText(this, "Sin permiso de micrófono, LIVRA no puede transcribir.", Toast.LENGTH_LONG).show();
+        if (requestCode != REQUEST_AUDIO) return;
+        boolean granted = results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED;
+        if (pendingWebPermissionRequest != null) {
+            if (granted) pendingWebPermissionRequest.grant(pendingWebPermissionRequest.getResources());
+            else pendingWebPermissionRequest.deny();
+            pendingWebPermissionRequest = null;
+        }
+        notifyMicPermission(granted);
+        if (!granted) Toast.makeText(this, "Para grabar y transcribir, permití el micrófono de LIVRA.", Toast.LENGTH_LONG).show();
     }
 
     @Override public void onBackPressed() {
