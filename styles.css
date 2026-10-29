@@ -258,3 +258,12 @@ footer{flex:0 0 34px;height:34px;overflow:hidden;padding:7px 8px 4px}
 .book-cover-title{font-family:Georgia,serif;font-size:clamp(17px,4.5vw,23px)!important;line-height:1.1!important;overflow-wrap:anywhere;text-shadow:0 2px 8px #000;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;max-height:5em;width:100%;z-index:1}
 .book-cover-meta{font-size:11px!important;font-weight:800;letter-spacing:.6px;text-transform:uppercase;text-shadow:0 1px 5px #000;z-index:1}
 @media(min-width:520px){.book-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* LIVRA library shelves: compact posters with three columns on mobile */
+#library .book-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 9px;align-items:start}
+#library .book-card{min-width:0;width:100%;padding:0;background:transparent;border:0;border-radius:9px}
+#library .book-cover{aspect-ratio:2/3;width:100%;min-height:0;border-radius:7px;padding:8px 5px 9px;gap:5px;box-shadow:0 5px 12px rgba(0,0,0,.35)}
+#library .book-cover-logo{width:23px!important;height:23px!important;top:6px;left:6px}
+#library .book-cover-title{font-size:clamp(12px,3.25vw,17px)!important;line-height:1.08!important;-webkit-line-clamp:4;max-height:4.4em}
+#library .book-cover-meta{font-size:8px!important;letter-spacing:.3px}
+@media(min-width:520px){#library .book-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 12px}#library .book-cover{padding:11px 7px 12px}#library .book-cover-logo{width:28px!important;height:28px!important}#library .book-cover-title{font-size:clamp(14px,2.6vw,21px)!important}#library .book-cover-meta{font-size:10px!important}}
