@@ -7,7 +7,7 @@
 <meta name="description" content="LIVRA transforma tu voz en libros.">
 <link rel="manifest" href="./manifest.webmanifest?v=20">
 <link rel="icon" href="./icons/livra.svg?v=20" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=39">
+<link rel="stylesheet" href="./styles.css?v=40">
 <title>LIVRA — Tu voz, tu libro</title>
 </head>
 <body>
@@ -51,7 +51,8 @@
 <section id="library" class="screen">
   <div class="library-brand-heading"><div class="library-brand-lockup"><img src="./icons/livra.svg?v=20" alt="Logo de LIVRA"><div><h1>Mi biblioteca</h1><p id="librarySubtitle" class="subtitle">Tus historias. Tus libros. Tus logros.</p></div></div><span class="library-brand-tag">LIVRA ORIGINALS</span></div>
   <div id="bookGrid" class="book-grid"></div>
-  <div id="emptyLibrary" class="empty-state"><div class="empty-book">▤</div><h2>Tu biblioteca empieza con una historia</h2><p>Tu primera historia puede convertirse en tu primer libro. Tocá GRABAR para empezar.</p></div>
+  <div id="emptyLibrary" class="empty-state"><div class="empty-book">▤</div><h2>Tu primer libro empieza con tu voz</h2><p>Esta estantería está lista para tu primera historia.</p><div class="empty-shelf" aria-hidden="true"><span></span><span></span><span></span></div></div>
+  <button id="publishAmazon" class="quiet-button amazon-button">📚 PUBLICAR EN AMAZON</button>
   <button id="libraryRecord" class="big-button record-home"><span class="button-icon">🎙</span> GRABAR</button>
   <button id="libraryHome" class="quiet-button">Volver al inicio</button>
 </section>
@@ -75,5 +76,5 @@
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </main>
 <footer>Tu voz. Tu historia. Tu libro.</footer>
-<script src="./app.js?v=36"></script>
+<script src="./app.js?v=37"></script>
 </body></html>
