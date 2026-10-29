@@ -1,13 +1,5 @@
-const CACHE="livra-shell-v17";
-const FILES=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icons/livra.svg?v=17"];
-self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("livra-shell-")&&k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
-self.addEventListener("fetch",e=>{
- if(e.request.method!=="GET")return;
- const u=new URL(e.request.url);
- if(e.request.mode==="navigate"||u.pathname.endsWith(".html")||u.pathname.endsWith(".js")||u.pathname.endsWith(".css")){
-  e.respondWith(fetch(e.request,{cache:"no-store"}).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(e.request,res.clone()));return res}).catch(()=>caches.match(e.request).then(hit=>hit||caches.match("./index.html"))));
-  return;
- }
- e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(res=>{if(res.ok)caches.open(CACHE).then(c=>c.put(e.request,res.clone()));return res})));
-});
+const CACHE="livra-shell-v18";
+const FILES=["./","./index.html","./styles.css?v=18","./app.js?v=18","./manifest.webmanifest?v=18","./icons/livra.svg?v=18"];
+self.addEventListener("install",function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(FILES);}));self.skipWaiting();});
+self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k.startsWith("livra-shell-")&&k!==CACHE;}).map(function(k){return caches.delete(k);}));}));self.clients.claim();});
+self.addEventListener("fetch",function(e){if(e.request.method!=="GET")return;const u=new URL(e.request.url);if(e.request.mode==="navigate"||/\.(html|js|css|svg|webmanifest)$/.test(u.pathname)){e.respondWith(fetch(e.request,{cache:"no-store"}).then(function(res){if(res.ok)caches.open(CACHE).then(function(c){c.put(e.request,res.clone());});return res;}).catch(function(){return caches.match(e.request).then(function(hit){return hit||caches.match("./index.html");});}));return;}e.respondWith(caches.match(e.request).then(function(hit){return hit||fetch(e.request);}));});
