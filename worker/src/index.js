@@ -14,6 +14,21 @@ export default {
     if (request.method === "GET" && url.pathname === "/health") {
       return Response.json({ ok: true, service: "LIVRA transcription", model: "@cf/openai/whisper", configured: Boolean(env.AI) }, { headers: cors });
     }
+    if (request.method === "POST" && url.pathname === "/cover") {
+      if (!env.AI) return Response.json({ error: "Workers AI binding is not configured." }, { status: 503, headers: cors });
+      try {
+        const payload = await request.json();
+        const title = String(payload && payload.title || "Mi historia").trim().slice(0, 160);
+        const source = String(payload && payload.text || "").trim().slice(0, 1800);
+        if (!source) return Response.json({ error: "Book text is required." }, { status: 400, headers: cors });
+        const prompt = "Create a beautiful, professional, literary book cover illustration inspired by this personal story. Theme: " + title + ". Story: " + source + ". Premium bookstore cover art, emotionally resonant editorial illustration, clear central metaphor, cinematic lighting, refined deep blue and warm gold palette, portrait 2:3 composition. No text, letters, typography, logos, watermark, or mockup. One standalone illustration only.";
+        const result = await env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt });
+        const image = result instanceof Uint8Array ? result : (result && result.image ? result.image : result);
+        return new Response(image, { status: 200, headers: { ...cors, "Content-Type": "image/png", "Cache-Control": "no-store" } });
+      } catch (error) {
+        return Response.json({ error: "No se pudo generar la tapa con IA." }, { status: 502, headers: cors });
+      }
+    }
     if (request.method === "POST" && url.pathname === "/compose") {
       if (!env.AI) return Response.json({ error: "Workers AI binding is not configured." }, { status: 503, headers: cors });
       try {
