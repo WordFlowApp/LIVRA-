@@ -208,3 +208,41 @@ main{height:calc(100dvh - 104px);min-height:0;max-height:calc(100dvh - 104px);pa
 #audioFiles #audioBackHome{flex:0 0 auto;min-height:42px;padding:7px 12px;font-size:15px}
 footer{flex:0 0 34px;height:34px;overflow:hidden;padding:7px 8px 4px}
 @media(max-height:720px){#home .hero-icon{width:min(34vw,145px);max-height:20dvh}#home h1{font-size:32px}#home .big-button{min-height:62px}#audioFiles .screen-heading h1{font-size:27px}#audioFiles .subtitle{font-size:14px}#audioFiles .audio-card{min-height:55px}#audioFiles .build-button{min-height:56px}footer{height:26px;flex-basis:26px}}
+
+
+/* LIVRA v32: transcription-first recording screen and immersive book pages */
+#recording{gap:clamp(5px,1vh,9px);padding-top:2px}
+#recording .screen-heading{min-height:38px}
+#recording .screen-heading h1{font-size:clamp(25px,6vw,33px)}
+#recording .mic-visual{width:min(27vw,105px);height:min(27vw,105px);border-width:3px;box-shadow:0 0 0 5px #e9c76a1a,0 0 16px #e9c76a24}
+#recording .mic-glyph{font-size:clamp(42px,11vw,58px)}
+#recording .timer{font-size:clamp(29px,7vw,38px);line-height:1}
+#recording .record-state{font-size:15px;min-height:19px}
+#recording .waveform{height:23px;flex:0 0 23px}
+#recording .field-label{font-size:18px}
+#recording .transcript-edit{flex:1 1 auto;min-height:0;height:100%;max-height:none;resize:none;font-size:18px;line-height:1.45;padding:12px;overflow:auto}
+#recording .record-controls{flex:0 0 auto;margin-top:0;gap:7px}
+#recording .control-button{min-height:58px;padding:7px 4px;font-size:clamp(14px,3.6vw,18px);gap:3px}
+#recording .control-button span{font-size:23px}
+#recording #cancelRecording{flex:0 0 auto;min-height:42px;padding:8px 12px;font-size:15px}
+#recording .screen-heading{flex:0 0 auto}
+#recording #micVisual,#recording #timer,#recording #recordState,#recording #waveform,#recording .field-label{flex:0 0 auto}
+.image-picker-label{display:block;text-align:center;padding:12px 10px;border:1px solid #647b9b;border-radius:14px;background:#10294d;color:#f5d778;font-weight:850;font-size:15px}
+.image-picker-input{width:100%;max-width:100%;color:#dce7f4;font-size:13px}
+.image-selection-status{text-align:center;color:#b8c7dc;font-size:13px;margin:0}
+#reader{gap:8px;padding-bottom:4px}
+#reader .back-button{min-height:38px;padding:6px 12px;font-size:15px}
+#reader .reader-cover{display:none}
+#reader .reader-page{position:relative;flex:1 1 auto;min-height:0;padding:8px;background:#fffdf6;border-radius:5px;box-shadow:0 4px 18px #0005;overflow:hidden}
+.book-page-frame{position:relative;display:flex;flex-direction:column;height:100%;min-height:0;border:3px double #c7a65a;border-radius:5px;padding:10px 12px 7px;background:repeating-linear-gradient(0deg,#fffdf6,#fffdf6 27px,#f1eadb 28px)}
+.book-page-frame:before,.book-page-frame:after{content:"✦ ❧ ✦ ❧ ✦";display:block;text-align:center;color:#b48a38;letter-spacing:4px;font-size:13px;flex:0 0 auto}
+.book-running-title{text-align:center;text-transform:uppercase;letter-spacing:1.2px;color:#7b643b;font-size:11px;font-weight:800;padding:0 0 7px;border-bottom:1px solid #d8c89f;flex:0 0 auto}
+#reader .page-label{font-size:11px;margin-top:6px;flex:0 0 auto}
+#reader .reader-page h2{font-size:clamp(21px,5.5vw,28px);margin:8px 0;color:#1b2b43;flex:0 0 auto}
+#reader .page-image{display:block;max-width:100%;width:auto;max-height:28%;object-fit:contain;align-self:center;margin:2px auto 8px;border-radius:4px}
+#reader .reader-page p{flex:1 1 auto;min-height:0;overflow-y:auto;font-size:clamp(17px,4.5vw,21px);line-height:1.55;margin:4px 0 8px;white-space:pre-wrap}
+.book-page-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #d8c89f;padding-top:6px;color:#8b7448;font-family:Georgia,serif;font-size:12px;flex:0 0 auto}
+#reader .reader-navigation{flex:0 0 auto}
+#reader .reader-navigation .control-button{min-height:48px;padding:6px 4px;font-size:13px}
+#reader #listenBook{flex:0 0 auto;min-height:54px;font-size:18px}
+@media(max-height:760px){#recording{gap:4px}#recording .mic-visual{width:76px;height:76px}#recording .mic-glyph{font-size:40px}#recording .waveform{height:17px;flex-basis:17px}#recording .transcript-edit{font-size:17px}#recording .control-button{min-height:50px}#reader .reader-page h2{margin:5px 0}#reader .reader-page p{font-size:17px;line-height:1.4}#reader #listenBook{min-height:46px}}
