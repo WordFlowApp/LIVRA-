@@ -41,6 +41,9 @@
   <p class="subtitle">Elegí las historias que querés convertir en libro.</p>
   <div id="recordingList" class="audio-list"></div>
   <div id="selectionStatus" class="selection-status">0 grabaciones seleccionadas</div>
+  <label class="image-picker-label" for="bookImages">🖼️ AGREGAR IMÁGENES A LAS PÁGINAS</label>
+  <input id="bookImages" class="image-picker-input" type="file" accept="image/*" multiple>
+  <p id="imageSelectionStatus" class="image-selection-status">Podés elegir varias imágenes; se ubicarán en las primeras páginas.</p>
   <button id="buildBook" class="big-button build-button"><span class="button-icon">▤</span> ARMAR LIBRO</button>
   <button id="audioBackHome" class="quiet-button">Volver al inicio</button>
 </section>
@@ -57,16 +60,21 @@
 <section id="reader" class="screen">
   <button id="readerBack" class="back-button">← Biblioteca</button>
   <div id="coverPreview" class="reader-cover"><img src="./icons/livra.svg?v=19" alt=""><h2 id="readerTitle">Mi historia</h2><p>Una historia contada con tu voz</p></div>
-  <div class="reader-page">
-    <div id="pageLabel" class="page-label">INTRODUCCIÓN</div>
-    <h2 id="pageHeading">Mi historia</h2>
-    <p id="pageText">Tu libro aparecerá acá.</p>
-  </div>
+  <article class="reader-page">
+    <div class="book-running-title" id="bookRunningTitle">Mi historia</div>
+    <div class="book-page-frame">
+      <div id="pageLabel" class="page-label">TU HISTORIA</div>
+      <h2 id="pageHeading">Mi historia</h2>
+      <img id="pageImage" class="page-image hidden" alt="Ilustración de esta página">
+      <p id="pageText">Tu libro aparecerá acá.</p>
+      <div class="book-page-footer"><span id="pageFooterTitle">Mi historia</span><span id="pageNumber">1</span></div>
+    </div>
+  </article>
   <div class="reader-navigation"><button id="prevPage" class="control-button pause">← ANTERIOR</button><span id="pageCount">1 / 1</span><button id="nextPage" class="control-button pause">SIGUIENTE →</button></div>
   <button id="listenBook" class="big-button library-home">🔊 ESCUCHAR EL LIBRO</button>
 </section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </main>
 <footer>Tu voz. Tu historia. Tu libro.</footer>
-<script src="./app.js?v=31"></script>
+<script src="./app.js?v=32"></script>
 </body></html>
