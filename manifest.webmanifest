@@ -10,5 +10,5 @@
   "orientation": "portrait",
   "background_color": "#061a3b",
   "theme_color": "#061a3b",
-  "icons": [{"src":"./icons/livra.svg?v=18","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "icons": [{"src":"./icons/livra.svg?v=20","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
