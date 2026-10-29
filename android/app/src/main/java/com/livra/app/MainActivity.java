@@ -4,6 +4,16 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -28,6 +38,14 @@ public class MainActivity extends Activity {
     private boolean listening = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private android.webkit.PermissionRequest pendingWebPermissionRequest;
+    private static final int LIVRA_SAMPLE_RATE = 16000;
+    private AudioRecord livraAudioRecord;
+    private ParcelFileDescriptor[] livraAudioPipe;
+    private OutputStream livraSpeechPipe;
+    private ByteArrayOutputStream livraPcm;
+    private Thread livraCaptureThread;
+    private final AtomicBoolean livraRecording = new AtomicBoolean(false);
+    private volatile boolean livraPaused = false;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -79,8 +97,125 @@ public class MainActivity extends Activity {
                 }
             });
         }
+        @JavascriptInterface public void startRecording() { runOnUiThread(() -> beginLivraRecording()); }
+        @JavascriptInterface public void stopRecording() { runOnUiThread(() -> finishLivraRecording()); }
+        @JavascriptInterface public void pauseRecording() { livraPaused = true; }
+        @JavascriptInterface public void resumeRecording() { livraPaused = false; }
         @JavascriptInterface public void start() { runOnUiThread(() -> startNativeRecognition()); }
         @JavascriptInterface public void stop() { runOnUiThread(() -> stopNativeRecognition()); }
+    }
+
+
+    // Capture the microphone once, then feed the same PCM frames to the WAV file and Android speech recognition.
+    private void beginLivraRecording() {
+        if (Build.VERSION.SDK_INT < 33) {
+            sendToPage("recordingError", "La grabación y transcripción compartida requiere Android 13 o superior.");
+            return;
+        }
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            sendToPage("recordingError", "Permití el micrófono de LIVRA."); return;
+        }
+        if (livraRecording.get()) return;
+        try {
+            int min = AudioRecord.getMinBufferSize(LIVRA_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+            if (min <= 0) throw new IllegalStateException("AudioRecord no está disponible");
+            int size = Math.max(min, 6400);
+            livraAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, LIVRA_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size);
+            if (livraAudioRecord.getState() != AudioRecord.STATE_INITIALIZED) throw new IllegalStateException("No se pudo abrir el micrófono");
+            livraAudioPipe = ParcelFileDescriptor.createPipe();
+            livraSpeechPipe = new ParcelFileDescriptor.AutoCloseOutputStream(livraAudioPipe[1]);
+            livraPcm = new ByteArrayOutputStream();
+            livraPaused = false;
+            startSpeechFromAudioPipe(livraAudioPipe[0]);
+            livraAudioRecord.startRecording();
+            livraRecording.set(true);
+            livraCaptureThread = new Thread(() -> {
+                byte[] buf = new byte[size];
+                while (livraRecording.get()) {
+                    if (livraPaused) { try { Thread.sleep(40); } catch (InterruptedException ignored) {} continue; }
+                    int n = livraAudioRecord.read(buf, 0, buf.length);
+                    if (n > 0) {
+                        synchronized (livraPcm) { livraPcm.write(buf, 0, n); }
+                        try { livraSpeechPipe.write(buf, 0, n); livraSpeechPipe.flush(); } catch (IOException closedPipe) { /* Keep saving audio. */ }
+                    } else if (n < 0 && livraRecording.get()) { sendToPage("recordingError", "Error leyendo el micrófono."); break; }
+                }
+            }, "LIVRA-AudioCapture");
+            livraCaptureThread.start();
+            sendToPage("recordingStarted", "");
+        } catch (Exception e) {
+            livraRecording.set(false); cleanupLivraAudio();
+            sendToPage("recordingError", e.getMessage() == null ? "No se pudo iniciar el micrófono." : e.getMessage());
+        }
+    }
+
+    private void startSpeechFromAudioPipe(ParcelFileDescriptor source) {
+        if (recognizer != null) { recognizer.destroy(); recognizer = null; }
+        recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        recognizer.setRecognitionListener(new RecognitionListener() {
+            @Override public void onReadyForSpeech(Bundle b) { sendToPage("speechStatus", "listening"); }
+            @Override public void onBeginningOfSpeech() {}
+            @Override public void onRmsChanged(float v) {}
+            @Override public void onBufferReceived(byte[] b) {}
+            @Override public void onEndOfSpeech() {}
+            @Override public void onError(int e) { if (livraRecording.get()) sendToPage("speechError", String.valueOf(e)); }
+            @Override public void onResults(Bundle b) { sendSpeechResult(b); }
+            @Override public void onPartialResults(Bundle b) { sendSpeechResult(b, true); }
+            @Override public void onEvent(int e, Bundle b) {}
+            @Override public void onSegmentResults(Bundle b) { sendSpeechResult(b); }
+            @Override public void onEndOfSegmentedSession() {}
+        });
+        Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-AR");
+        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "es-AR");
+        i.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+        i.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        i.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, source);
+        i.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1);
+        i.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, AudioFormat.ENCODING_PCM_16BIT);
+        i.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, LIVRA_SAMPLE_RATE);
+        i.putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION, RecognizerIntent.EXTRA_AUDIO_SOURCE);
+        recognizer.startListening(i);
+    }
+    private void sendSpeechResult(Bundle b) { sendSpeechResult(b, false); }
+    private void sendSpeechResult(Bundle b, boolean partial) {
+        ArrayList<String> matches = b.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        if (matches != null && !matches.isEmpty()) sendToPage(partial ? "speechPartial" : "speechResult", matches.get(0));
+    }
+    private void finishLivraRecording() {
+        if (!livraRecording.getAndSet(false)) return;
+        try { if (livraAudioRecord != null) livraAudioRecord.stop(); } catch (Exception ignored) {}
+        try { if (livraCaptureThread != null) livraCaptureThread.join(1200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {}
+        if (recognizer != null) { try { recognizer.stopListening(); } catch (Exception ignored) {} handler.postDelayed(() -> { if (recognizer != null) { recognizer.destroy(); recognizer = null; } }, 1600); }
+        byte[] pcm;
+        synchronized (livraPcm == null ? this : livraPcm) { pcm = livraPcm == null ? new byte[0] : livraPcm.toByteArray(); }
+        byte[] wav = livraMakeWav(pcm);
+        cleanupLivraAudio();
+        int chunkSize = 24000, total = (wav.length + chunkSize - 1) / chunkSize;
+        sendToPage("audioStart", String.valueOf(total));
+        for (int p = 0; p < total; p++) {
+            int start = p * chunkSize, len = Math.min(chunkSize, wav.length - start);
+            byte[] chunk = new byte[len]; System.arraycopy(wav, start, chunk, 0, len);
+            sendToPage("audioChunk", p + "|" + android.util.Base64.encodeToString(chunk, android.util.Base64.NO_WRAP));
+        }
+        sendToPage("audioEnd", String.valueOf(wav.length));
+    }
+    private byte[] livraMakeWav(byte[] pcm) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream(pcm.length + 44); DataOutputStream d = new DataOutputStream(out);
+            d.writeBytes("RIFF"); livraWriteLE(d, pcm.length + 36); d.writeBytes("WAVE"); d.writeBytes("fmt "); livraWriteLE(d, 16);
+            livraWriteLEShort(d, 1); livraWriteLEShort(d, 1); livraWriteLE(d, LIVRA_SAMPLE_RATE); livraWriteLE(d, LIVRA_SAMPLE_RATE * 2);
+            livraWriteLEShort(d, 2); livraWriteLEShort(d, 16); d.writeBytes("data"); livraWriteLE(d, pcm.length); d.write(pcm); d.flush(); return out.toByteArray();
+        } catch (IOException e) { throw new IllegalStateException(e); }
+    }
+    private void livraWriteLE(DataOutputStream d, int v) throws IOException { d.writeByte(v & 255); d.writeByte((v >> 8) & 255); d.writeByte((v >> 16) & 255); d.writeByte((v >> 24) & 255); }
+    private void livraWriteLEShort(DataOutputStream d, int v) throws IOException { d.writeByte(v & 255); d.writeByte((v >> 8) & 255); }
+    private void cleanupLivraAudio() {
+        if (livraAudioRecord != null) { try { livraAudioRecord.release(); } catch (Exception ignored) {} livraAudioRecord = null; }
+        try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {} livraSpeechPipe = null;
+        if (livraAudioPipe != null) { try { livraAudioPipe[0].close(); } catch (Exception ignored) {} try { livraAudioPipe[1].close(); } catch (Exception ignored) {} livraAudioPipe = null; }
+        livraCaptureThread = null;
     }
 
     private void startNativeRecognition() {
@@ -177,6 +312,8 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onDestroy() {
+        livraRecording.set(false);
+        cleanupLivraAudio();
         stopNativeRecognition();
         if (webView != null) { webView.removeJavascriptInterface("LIVRAAndroidSpeech"); webView.destroy(); webView = null; }
         super.onDestroy();
