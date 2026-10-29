@@ -76,4 +76,35 @@ $("nextPage").addEventListener("click",function(){if(pageIndex<bookPages.length-
 let readingBook=false;function speakBookFrom(index){if(!("speechSynthesis" in window)){toast("La lectura en voz alta no está disponible en este navegador.");return;}if(index>=bookPages.length){readingBook=false;$("listenBook").textContent="🔊 ESCUCHAR EL LIBRO";return;}pageIndex=index;renderPage();const page=bookPages[index];const utterance=new SpeechSynthesisUtterance((page.heading||"")+" . "+(page.body||""));utterance.lang="es-AR";utterance.onend=function(){if(readingBook)speakBookFrom(index+1);};utterance.onerror=function(){readingBook=false;$("listenBook").textContent="🔊 ESCUCHAR EL LIBRO";};window.speechSynthesis.speak(utterance);}$("listenBook").addEventListener("click",function(){if(readingBook){readingBook=false;window.speechSynthesis.cancel();$("listenBook").textContent="🔊 ESCUCHAR EL LIBRO";return;}window.speechSynthesis.cancel();readingBook=true;$("listenBook").textContent="■ DETENER LECTURA";speakBookFrom(pageIndex);});
 window.addEventListener("pagehide",function(){stopTimer();stopRecognition();releaseStream();stopPreview();});
 // LIVRA 3.3: start with two clear choices; the library is one tap away.
-show("home");
+show("home"); async function composeBook(source,title){
+  const response=await fetch(LIVRA_EDITOR_API+"/compose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:title,text:source})});
+  let data={};try{data=await response.json();}catch(e){}
+  if(!response.ok)throw new Error(data.error||"El editor literario no respondió.");
+  const plain=function(value){if(typeof value==="string")return value.trim();if(typeof value==="number")return String(value);if(Array.isArray(value))return value.map(plain).filter(Boolean).join("\\n\\n");if(value&&typeof value==="object"){for(const key of ["text","content","body","value","paragraph","narrative"]){if(value[key]!==undefined){const out=plain(value[key]);if(out)return out;}}return Object.values(value).map(plain).filter(Boolean).join("\\n\\n");}return "";};
+  const finalTitle=plain(data.title)||title;
+  const subtitle=plain(data.subtitle);
+  const summary=plain(data.summary);
+  const prologue=plain(data.prologue);
+  if(!summary||!prologue||!Array.isArray(data.chapters)||!data.chapters.length)throw new Error("La IA no devolvió un libro completo. Tu grabación sigue guardada; intentá nuevamente.");
+  const pages=[];
+  pages.push({heading:"Resumen",body:(subtitle?subtitle+"\\n\\n":"")+summary,section:"summary"});
+  pages.push({heading:"Prólogo",body:prologue,section:"prologue"});
+  data.chapters.forEach(function(chapter,index){const chapterTitle=plain(chapter&&chapter.title)||("Capítulo "+(index+1));const chapterText=plain(chapter&&(chapter.text||chapter.content||chapter.body));if(chapterText&&chapterText!=="[object Object]"){splitIntoBookPages(chapterText,chapterTitle).forEach(function(page,pageIndex){pages.push({heading:pageIndex===0?chapterTitle:chapterTitle+" (continuación)",body:page.body,section:"chapter"});});}});
+  if(pages.length<3||pages.some(function(page){return typeof page.body!=="string"||page.body.includes("[object Object]");}))throw new Error("La IA devolvió páginas incompletas. Tu grabación sigue guardada; intentá nuevamente.");
+  return {title:finalTitle,subtitle:subtitle,summary:summary,prologue:prologue,pages:pages};
+} $("buildBook").addEventListener("click",async function(){
+  const chosen=recordings.filter(function(item){return selectedAudioIds.has(item.id);});
+  if(!chosen.length){toast("Seleccioná al menos una grabación.");return;}
+  const transcript=chosen.map(function(item){return (item.transcript||"").trim();}).filter(Boolean).join("\\n\\n");
+  if(transcript.length<5){toast("Primero necesitás una transcripción guardada. Tu audio sigue disponible.");return;}
+  const title=chosen.length===1?(chosen[0].title||"Mi historia"):"Mis historias";
+  const button=$("buildBook");button.disabled=true;button.textContent="✍️ LA IA ESTÁ ESCRIBIENDO…";toast("La IA está convirtiendo tu relato en un libro literario.");
+  try{
+    const composed=await composeBook(transcript,title);
+    const book={type:"book",title:composed.title,subtitle:composed.subtitle||"",createdAt:new Date().toISOString(),audioIds:chosen.map(function(item){return item.id;}),transcript:transcript,summary:composed.summary,prologue:composed.prologue,pages:composed.pages,coverImage:null,coverTone:Math.floor(Math.random()*5),localDraft:false};
+    book.id=await addItem("books",book);
+    selectedAudioIds.clear();show("library");renderLibrary();toast("¡Libro creado con edición literaria! Generando una tapa con IA…");
+    try{const imageData=await generateAICover(book.title,transcript);book.coverImage=imageData;await putItem("books",book);renderLibrary();if(activeBook&&activeBook.id===book.id){const cover=$("coverPreview");cover.style.backgroundImage="linear-gradient(180deg,rgba(5,18,40,.12),rgba(5,18,40,.72)),url("+JSON.stringify(imageData)+")";cover.style.backgroundSize="cover";cover.style.backgroundPosition="center";}}catch(coverError){toast("El libro ya está guardado. La tapa con IA no se pudo generar esta vez.");}
+  }catch(e){toast((e&&e.message?e.message:"No se pudo editar el libro.")+" Tu grabación sigue guardada.");}
+  finally{button.disabled=selectedAudioIds.size===0;button.innerHTML='<span class="button-icon">▤</span> ARMAR LIBRO';}
+ });
