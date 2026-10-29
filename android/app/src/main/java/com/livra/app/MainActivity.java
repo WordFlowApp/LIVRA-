@@ -286,7 +286,7 @@ public class MainActivity extends Activity {
         String encoded = android.util.Base64.encodeToString(value.getBytes(java.nio.charset.StandardCharsets.UTF_8), android.util.Base64.NO_WRAP);
         runOnUiThread(() -> {
             if (webView != null) webView.evaluateJavascript(
-                "window." + callback + " && window." + callback + "(atob('" + encoded + "'))", null);
+                "window." + callback + " && window." + callback + "(decodeURIComponent(escape(atob('" + encoded + "'))))", null);
         });
     }
 
