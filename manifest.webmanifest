@@ -1,21 +1,14 @@
 {
   "id": "./",
-  "name": "LIVRA — Grabá y armá tu libro",
+  "name": "LIVRA — Tu voz, tu libro",
   "short_name": "LIVRA",
-  "description": "Guardá audios, elegí fotos y armá tu propio libro con LIVRA.",
+  "description": "Grabá tus historias y convertí tus palabras en libros.",
   "lang": "es-AR",
-  "start_url": "./?v=17",
+  "start_url": "./?v=18",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#091b33",
-  "theme_color": "#091b33",
-  "icons": [
-    {
-      "src": "./icons/livra.svg?v=17",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "background_color": "#061a3b",
+  "theme_color": "#061a3b",
+  "icons": [{"src":"./icons/livra.svg?v=18","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
