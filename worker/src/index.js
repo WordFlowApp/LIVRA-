@@ -23,8 +23,19 @@ export default {
         if (!source) return Response.json({ error: "Book text is required." }, { status: 400, headers: cors });
         const prompt = "Create a beautiful, professional, literary book cover illustration inspired by this personal story. Theme: " + title + ". Story: " + source + ". Premium bookstore cover art, emotionally resonant editorial illustration, clear central metaphor, cinematic lighting, refined deep blue and warm gold palette, portrait 2:3 composition. No text, letters, typography, logos, watermark, or mockup. One standalone illustration only.";
         const result = await env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt });
-        const image = result instanceof Uint8Array ? result : (result && result.image ? result.image : result);
-        return new Response(image, { status: 200, headers: { ...cors, "Content-Type": "image/png", "Cache-Control": "no-store" } });
+        let imageBytes;
+        if (result instanceof Uint8Array) {
+          imageBytes = result;
+        } else if (result && result.image instanceof Uint8Array) {
+          imageBytes = result.image;
+        } else if (result && typeof result.image === "string") {
+          const binary = atob(result.image);
+          imageBytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) imageBytes[i] = binary.charCodeAt(i);
+        } else {
+          throw new Error("AI image response was empty or unsupported");
+        }
+        return new Response(imageBytes, { status: 200, headers: { ...cors, "Content-Type": "image/png", "Cache-Control": "no-store" } });
       } catch (error) {
         return Response.json({ error: "No se pudo generar la tapa con IA." }, { status: 502, headers: cors });
       }
