@@ -56,8 +56,8 @@ export default {
           "Devolvé SOLO JSON válido, sin Markdown ni comentarios, con esta estructura exacta: {\"title\":\"...\",\"subtitle\":\"...\",\"summary\":\"...\",\"prologue\":\"...\",\"chapters\":[{\"title\":\"...\",\"text\":\"...\"}]}",
           "Antes de responder, verificá que cada campo sea texto simple, que cada capítulo tenga un título y texto real, que no haya marcadores genéricos y que el resultado esté claramente mejor escrito que la transcripción original.",
           "Título de referencia, solo si resulta útil: " + requestedTitle,
-          "TRANSCRIPCIÓN ORIGINAL (fuente de verdad):\\n" + source
-        ].join("\\n\\n");
+          "TRANSCRIPCIÓN ORIGINAL (fuente de verdad):\n" + source
+        ].join("\n\n");
         const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
           messages: [
             { role: "system", content: "Sos una autora y editora literaria profesional. Transformá la fuente en una obra bien narrada, fiel a los hechos y sin relleno. Respondé únicamente JSON válido con todos los campos de texto como strings." },
@@ -74,12 +74,12 @@ export default {
         const textValue = (value) => {
           if (typeof value === "string") return value.trim();
           if (typeof value === "number") return String(value);
-          if (Array.isArray(value)) return value.map(textValue).filter(Boolean).join("\\n\\n");
+          if (Array.isArray(value)) return value.map(textValue).filter(Boolean).join("\n\n");
           if (value && typeof value === "object") {
             for (const key of ["text", "content", "body", "value", "paragraph", "narrative"]) {
               if (value[key] !== undefined) { const result = textValue(value[key]); if (result) return result; }
             }
-            return Object.values(value).map(textValue).filter(Boolean).join("\\n\\n");
+            return Object.values(value).map(textValue).filter(Boolean).join("\n\n");
           }
           return "";
         };
