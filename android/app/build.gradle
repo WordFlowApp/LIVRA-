@@ -1,3 +1,4 @@
+// LIVRA Android wrapper — first APK build validation.
 plugins {
     id 'com.android.application'
 }
