@@ -276,3 +276,12 @@ footer{flex:0 0 34px;height:34px;overflow:hidden;padding:7px 8px 4px}
 #library .library-brand-lockup .subtitle{margin:5px 0 0;font-size:13px;line-height:1.3;color:#b9c9df}
 #library .library-brand-tag{align-self:flex-start;color:#e7c76d;font-size:10px;font-weight:900;letter-spacing:2px}
 #library .book-grid{margin-top:10px}
+
+/* LIVRA 3.3: library-first experience and daily return loop */
+.library-brand-heading{gap:12px;}
+#libraryRecord{margin-top:8px;min-height:88px;}
+#libraryHome{order:3;}
+#emptyLibrary{padding:24px 16px;}
+#emptyLibrary h2{font-size:clamp(25px,6vw,34px);}
+#emptyLibrary p{font-size:18px;line-height:1.45;}
+#recording .transcript-edit{min-height:38svh;max-height:54svh;font-size:clamp(20px,5vw,26px);line-height:1.5;}
