@@ -246,3 +246,15 @@ footer{flex:0 0 34px;height:34px;overflow:hidden;padding:7px 8px 4px}
 #reader .reader-navigation .control-button{min-height:48px;padding:6px 4px;font-size:13px}
 #reader #listenBook{flex:0 0 auto;min-height:54px;font-size:18px}
 @media(max-height:760px){#recording{gap:4px}#recording .mic-visual{width:76px;height:76px}#recording .mic-glyph{font-size:40px}#recording .waveform{height:17px;flex-basis:17px}#recording .transcript-edit{font-size:17px}#recording .control-button{min-height:50px}#reader .reader-page h2{margin:5px 0}#reader .reader-page p{font-size:17px;line-height:1.4}#reader #listenBook{min-height:46px}}
+
+/* LIVRA library: cinematic vertical book posters */
+.book-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.book-card{min-width:0;text-align:left;background:transparent;border:0;padding:0;color:#f7f9ff;overflow:visible;transition:transform .18s ease}
+.book-card:active{transform:scale(.97)}
+.book-cover{position:relative;isolation:isolate;aspect-ratio:2/3;border-radius:12px;border:1px solid rgba(255,255,255,.25);padding:13px 10px 15px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:9px;text-align:center;box-shadow:0 9px 22px rgba(0,0,0,.38);overflow:hidden;background-color:#17345c}
+.book-cover-photo{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover;z-index:-2}
+.book-cover-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(3,12,28,.08) 0%,rgba(3,12,28,.08) 35%,rgba(3,12,28,.72) 72%,rgba(3,12,28,.94) 100%)}
+.book-cover-logo{width:33px!important;height:33px!important;object-fit:contain;position:absolute;top:10px;left:10px;filter:drop-shadow(0 2px 4px #0008)}
+.book-cover-title{font-family:Georgia,serif;font-size:clamp(17px,4.5vw,23px)!important;line-height:1.1!important;overflow-wrap:anywhere;text-shadow:0 2px 8px #000;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;max-height:5em;width:100%;z-index:1}
+.book-cover-meta{font-size:11px!important;font-weight:800;letter-spacing:.6px;text-transform:uppercase;text-shadow:0 1px 5px #000;z-index:1}
+@media(min-width:520px){.book-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
