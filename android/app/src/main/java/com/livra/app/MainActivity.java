@@ -15,6 +15,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebSettings;
 import android.widget.Toast;
 import android.content.Intent;
 import java.util.ArrayList;
@@ -34,8 +35,12 @@ public class MainActivity extends Activity {
         getWindow().setNavigationBarColor(Color.rgb(6, 26, 59));
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(6, 26, 59));
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setDomStorageEnabled(true);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        // Always load the latest deployed app code; keep IndexedDB/local storage intact.
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.clearCache(true);
         webView.addJavascriptInterface(new SpeechBridge(), "LIVRAAndroidSpeech");
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public void onPermissionRequest(android.webkit.PermissionRequest request) {
