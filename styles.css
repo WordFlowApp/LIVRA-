@@ -179,3 +179,32 @@ h1 span{color:var(--gold)}
 .reader-cover{border-color:#e9c76a}
 .quiet-button{border-color:#526782;color:#e1e9f4}
 footer{color:#8299b8}
+
+
+/* LIVRA v23: fixed-screen mobile layout; keep scrolling inside long lists only */
+html,body{height:100%;min-height:0;overflow:hidden}
+body{height:100dvh;min-height:0}
+.topbar{flex:0 0 62px;height:62px;font-size:27px;letter-spacing:2.5px}
+.brand-mark{width:42px;height:42px;font-size:27px}
+main{height:calc(100dvh - 104px);min-height:0;max-height:calc(100dvh - 104px);padding:10px 14px 8px;overflow:hidden;display:flex;flex-direction:column}
+.screen{height:100%;min-height:0;max-height:100%;overflow:hidden;gap:10px}
+#home{justify-content:center;gap:clamp(10px,2.2vh,18px);padding:0}
+#home .hero-icon{width:min(44vw,190px);max-height:25dvh}
+#home h1{font-size:clamp(34px,8.2vw,48px);line-height:1.04;margin:0 0 4px}
+#home .big-button{min-height:clamp(68px,10dvh,88px);font-size:clamp(26px,6.6vw,36px);border-radius:22px}
+#audioFiles{gap:8px}
+#audioFiles .screen-heading{flex:0 0 auto;min-height:48px}
+#audioFiles .screen-heading h1{font-size:clamp(29px,7vw,38px)}
+#audioFiles .subtitle{flex:0 0 auto;font-size:16px}
+#audioFiles .audio-list{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding-right:2px}
+#audioFiles .audio-card{min-height:64px;padding:7px 8px;grid-template-columns:34px 42px minmax(0,1fr) 32px;gap:7px;border-radius:14px}
+#audioFiles .audio-check{width:29px;height:29px}
+#audioFiles .play-button{width:40px;height:40px;font-size:20px}
+#audioFiles .audio-info strong{font-size:clamp(18px,4.8vw,23px)}
+#audioFiles .audio-info span{font-size:14px}
+#audioFiles .delete-audio-button{width:32px;height:34px;font-size:17px}
+#audioFiles .selection-status{flex:0 0 auto;font-size:16px}
+#audioFiles .build-button{flex:0 0 auto;min-height:64px;font-size:clamp(22px,5.8vw,30px);border-radius:17px}
+#audioFiles #audioBackHome{flex:0 0 auto;min-height:42px;padding:7px 12px;font-size:15px}
+footer{flex:0 0 34px;height:34px;overflow:hidden;padding:7px 8px 4px}
+@media(max-height:720px){#home .hero-icon{width:min(34vw,145px);max-height:20dvh}#home h1{font-size:32px}#home .big-button{min-height:62px}#audioFiles .screen-heading h1{font-size:27px}#audioFiles .subtitle{font-size:14px}#audioFiles .audio-card{min-height:55px}#audioFiles .build-button{min-height:56px}footer{height:26px;flex-basis:26px}}
