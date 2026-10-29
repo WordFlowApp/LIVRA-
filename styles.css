@@ -147,3 +147,35 @@ footer{padding:7px 10px calc(8px + env(safe-area-inset-bottom))}
 .delete-audio-button{width:36px;height:40px;border:1px solid #ff8b98;border-radius:12px;background:#4a1730;color:#fff;font-size:18px;display:grid;place-items:center}
 .delete-audio-button:disabled{opacity:.55}
 @media(max-width:370px){.audio-card{grid-template-columns:30px 40px minmax(0,1fr) 32px;gap:6px}.delete-audio-button{width:32px;height:36px}}
+
+
+/* LIVRA visual refinement: approved navy, gold and white identity */
+:root{--navy:#07172f;--navy2:#10294d;--blue:#1e67d8;--cyan:#82dfff;--gold:#e9c76a;--white:#f8f7f2;--muted:#b8c7dc}
+body{background:radial-gradient(ellipse at 50% 0%,#183b67 0%,#0b1c37 48%,#061226 100%)}
+.topbar{height:62px;padding-inline:20px;border-bottom:1px solid rgba(233,199,106,.24);letter-spacing:2px}
+.brand-mark{border-radius:12px;background:linear-gradient(145deg,#f5d982,#bd9235);border:1px solid #ffebad;color:#10213d;box-shadow:0 4px 14px #0003}
+#home{gap:14px}
+.hero-icon{width:min(42vw,176px);filter:drop-shadow(0 14px 24px #0005)}
+#home h1{font-size:clamp(32px,7.4vw,42px);letter-spacing:-1.1px;line-height:1.05;margin:3px 0 9px}
+h1 span{color:var(--gold)}
+.big-button{min-height:76px;border-radius:20px;font-size:clamp(21px,5.8vw,29px);letter-spacing:.3px;box-shadow:0 5px 0 rgba(0,0,0,.24),inset 0 1px 0 #ffffff40;transition:filter .15s,transform .15s}
+.big-button:active{transform:translateY(2px);filter:brightness(1.08)}
+.record-home{background:linear-gradient(135deg,#f4d778,#c79a3c);color:#10213b;border:1px solid #ffe9a4}
+.library-home{background:linear-gradient(135deg,#f8f8f3,#dce7f4);color:#10213b;border:1px solid #fff}
+.build-button{background:linear-gradient(135deg,#f4d778,#c79a3c);color:#10213b;border:1px solid #ffe9a4}
+.button-icon{font-size:1.18em}
+.screen-heading h1{color:#fbf7ec}
+.mini-icon{filter:drop-shadow(0 3px 7px #0004)}
+.mic-visual{background:radial-gradient(circle at 35% 25%,#f4d778,#bd9235 72%);border:4px solid #fff0ba;box-shadow:0 0 0 8px #e9c76a1a,0 0 28px #e9c76a30}
+.mic-glyph{filter:grayscale(1) brightness(0) invert(0.12)}
+.transcript-edit{background:#0b203e;border:1px solid #3d5a7f;border-radius:15px}
+.control-button{border-radius:15px;min-height:70px}
+.pause{background:#d7e3f3;color:#10213b}.stop{background:#a93446;color:#fff}.save{background:linear-gradient(135deg,#f4d778,#c79a3c);color:#10213b}
+.audio-card{background:linear-gradient(135deg,#122b4e,#0c203b);border:1px solid #2e496b;border-radius:16px}
+.play-button{background:#173e70;border-color:#82dfff}
+.delete-audio-button{background:#402033;border-color:#ad6d7b}
+.empty-state{border:1px dashed #536c8c;background:#0d2341;border-radius:20px}
+.book-cover{border-radius:15px;border-color:#e9c76a}
+.reader-cover{border-color:#e9c76a}
+.quiet-button{border-color:#526782;color:#e1e9f4}
+footer{color:#8299b8}
