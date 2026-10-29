@@ -49,33 +49,51 @@ export default {
         if (source.length < 80) return Response.json({ error: "La historia necesita al menos 80 caracteres para poder editarse como libro." }, { status: 400, headers: cors });
         if (source.length > 24000) return Response.json({ error: "La historia es demasiado larga para una sola edición. Dividila en grabaciones más cortas." }, { status: 413, headers: cors });
         const prompt = [
-          "Actuá como editor literario profesional de español rioplatense (Argentina). Convertí la transcripción hablada en un libro breve, bien redactado y coherente.",
-          "Reglas obligatorias: conservá el significado, los hechos, los nombres y la voz del autor; corregí errores de reconocimiento, puntuación, repeticiones y frases incompletas; reorganizá las ideas cuando ayude a la claridad; no inventes hechos, diálogos, recuerdos, fechas, lugares ni opiniones. Si falta información, omitila en vez de inventarla. No copies literalmente la transcripción. No menciones que sos una IA.",
-          "Devolvé SOLO JSON válido con esta estructura exacta: {\"title\":\"...\",\"summary\":\"...\",\"prologue\":\"...\",\"chapters\":[{\"title\":\"...\",\"text\":\"...\"}]}",
-          "El resumen debe ser breve y fiel. El prólogo debe presentar la obra sin agregar hechos. Organizá el contenido en 2 a 6 capítulos según la cantidad de material; cada capítulo debe desarrollar una idea con continuidad y tener un título. Si el material es corto, hacé menos capítulos y no rellenes.",
-          "Título sugerido: " + requestedTitle,
-          "TRANSCRIPCIÓN ORIGINAL (fuente de verdad):\n" + source
-        ].join("\n\n");
+          "Sos una escritora y editora literaria profesional en español rioplatense. Tu trabajo NO es transcribir ni resumir: es convertir el material hablado en un libro breve, atractivo y publicable, con voz narrativa, escenas claras, ritmo, sensibilidad, humor o emoción cuando el material lo permita.",
+          "Transformá muletillas, repeticiones, frases cortadas y errores de reconocimiento en prosa natural, fluida y elegante. Reordená las ideas para que exista un comienzo que enganche, un desarrollo y un cierre satisfactorio. Usá recursos literarios, imágenes y transiciones con moderación y buen gusto, siempre apoyados en lo que el autor contó.",
+          "Conservá la verdad central, las experiencias, los nombres y los hechos que aparecen en la fuente. No inventes sucesos concretos, personas, diálogos citados, fechas, lugares ni recuerdos. Podés mejorar la forma de narrar y expresar emociones implícitas de manera prudente, sin atribuir hechos nuevos. Si el material es una reflexión o una prueba técnica, convertí eso en un ensayo o crónica personal interesante; no finjas que es una aventura distinta.",
+          "Creá un título literario potente y un subtítulo que prometa el tema real del libro. El resumen debe ser una sinopsis editorial atractiva. El prólogo debe tener contenido específico derivado de la fuente, nunca una plantilla genérica. Desarrollá capítulos con títulos expresivos y texto sustancial; para una fuente corta, hacé una pieza breve y redonda en vez de agregar páginas vacías o relleno. No repitas el mismo texto en resumen, prólogo y capítulos.",
+          "Devolvé SOLO JSON válido, sin Markdown ni comentarios, con esta estructura exacta: {\"title\":\"...\",\"subtitle\":\"...\",\"summary\":\"...\",\"prologue\":\"...\",\"chapters\":[{\"title\":\"...\",\"text\":\"...\"}]}",
+          "Antes de responder, verificá que cada campo sea texto simple, que cada capítulo tenga un título y texto real, que no haya marcadores genéricos y que el resultado esté claramente mejor escrito que la transcripción original.",
+          "Título de referencia, solo si resulta útil: " + requestedTitle,
+          "TRANSCRIPCIÓN ORIGINAL (fuente de verdad):\\n" + source
+        ].join("\\n\\n");
         const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
           messages: [
-            { role: "system", content: "Sos un editor literario riguroso. La fidelidad a la fuente es prioritaria. Respondé únicamente JSON válido, sin Markdown." },
+            { role: "system", content: "Sos una autora y editora literaria profesional. Transformá la fuente en una obra bien narrada, fiel a los hechos y sin relleno. Respondé únicamente JSON válido con todos los campos de texto como strings." },
             { role: "user", content: prompt }
           ],
           max_tokens: 7000,
-          temperature: 0.35
+          temperature: 0.65
         });
         let raw = String(result && result.response || "").trim();
         raw = raw.replace(/^\x60\x60\x60(?:json)?\s*/i, "").replace(/\s*\x60\x60\x60$/, "");
         const first = raw.indexOf("{"), last = raw.lastIndexOf("}");
         if (first >= 0 && last > first) raw = raw.slice(first, last + 1);
         const parsed = JSON.parse(raw);
-        if (!parsed.title || !parsed.summary || !parsed.prologue || !Array.isArray(parsed.chapters) || !parsed.chapters.length) throw new Error("Invalid book structure");
-        const chapters = parsed.chapters.slice(0, 8).map(ch => ({
-          title: String(ch.title || "Capítulo").slice(0, 180),
-          text: String(ch.text || "").trim()
-        })).filter(ch => ch.text);
-        if (!chapters.length) throw new Error("No chapters returned");
-        return Response.json({ title: String(parsed.title).slice(0, 180), summary: String(parsed.summary), prologue: String(parsed.prologue), chapters, model: "@cf/meta/llama-3.1-8b-instruct" }, { headers: cors });
+        const textValue = (value) => {
+          if (typeof value === "string") return value.trim();
+          if (typeof value === "number") return String(value);
+          if (Array.isArray(value)) return value.map(textValue).filter(Boolean).join("\\n\\n");
+          if (value && typeof value === "object") {
+            for (const key of ["text", "content", "body", "value", "paragraph", "narrative"]) {
+              if (value[key] !== undefined) { const result = textValue(value[key]); if (result) return result; }
+            }
+            return Object.values(value).map(textValue).filter(Boolean).join("\\n\\n");
+          }
+          return "";
+        };
+        const title = textValue(parsed.title);
+        const subtitle = textValue(parsed.subtitle);
+        const summary = textValue(parsed.summary);
+        const prologue = textValue(parsed.prologue);
+        if (!title || !summary || !prologue || !Array.isArray(parsed.chapters) || !parsed.chapters.length) throw new Error("Invalid book structure");
+        const chapters = parsed.chapters.slice(0, 8).map((ch) => ({
+          title: textValue(ch && ch.title) || "Capítulo",
+          text: textValue(ch && (ch.text ?? ch.content ?? ch.body))
+        })).filter(ch => ch.text && ch.text !== "[object Object]");
+        if (!chapters.length) throw new Error("No valid chapters returned");
+        return Response.json({ title: title.slice(0, 180), subtitle: subtitle.slice(0, 240), summary, prologue, chapters, model: "@cf/meta/llama-3.1-8b-instruct" }, { headers: cors });
       } catch (error) {
         return Response.json({ error: "No se pudo editar el libro con IA. Probá otra vez; tu grabación original sigue guardada." }, { status: 502, headers: cors });
       }
