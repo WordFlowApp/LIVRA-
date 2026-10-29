@@ -1,5 +1,5 @@
-const CACHE="livra-shell-v16";
-const FILES=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icons/livra.svg?v=16"];
+const CACHE="livra-shell-v17";
+const FILES=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icons/livra.svg?v=17"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("livra-shell-")&&k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
 self.addEventListener("fetch",e=>{
