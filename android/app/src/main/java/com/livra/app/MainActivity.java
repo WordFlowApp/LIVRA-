@@ -40,8 +40,13 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public void onPermissionRequest(android.webkit.PermissionRequest request) {
                 runOnUiThread(() -> {
+                    String originHost = request.getOrigin() == null ? "" : request.getOrigin().getHost();
+                    if (!"wordflowapp.github.io".equals(originHost)) {
+                        request.deny();
+                        return;
+                    }
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                        request.grant(request.getResources());
+                        request.grant(new String[]{android.webkit.PermissionRequest.RESOURCE_AUDIO_CAPTURE});
                     } else {
                         pendingWebPermissionRequest = request;
                         requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO);
@@ -153,7 +158,7 @@ public class MainActivity extends Activity {
         if (requestCode != REQUEST_AUDIO) return;
         boolean granted = results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED;
         if (pendingWebPermissionRequest != null) {
-            if (granted) pendingWebPermissionRequest.grant(pendingWebPermissionRequest.getResources());
+            if (granted) pendingWebPermissionRequest.grant(new String[]{android.webkit.PermissionRequest.RESOURCE_AUDIO_CAPTURE});
             else pendingWebPermissionRequest.deny();
             pendingWebPermissionRequest = null;
         }
