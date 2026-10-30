@@ -20,6 +20,9 @@ import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import java.util.Locale;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -35,6 +38,8 @@ public class MainActivity extends Activity {
     private static final String APP_URL = "https://wordflowapp.github.io/LIVRA-/";
     private WebView webView;
     private SpeechRecognizer recognizer;
+    private TextToSpeech livraTts;
+    private volatile boolean livraTtsReady = false;
     private boolean listening = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private android.webkit.PermissionRequest pendingWebPermissionRequest;
@@ -51,6 +56,17 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         getWindow().setStatusBarColor(Color.rgb(6, 26, 59));
         getWindow().setNavigationBarColor(Color.rgb(6, 26, 59));
+        livraTts = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS && livraTts != null) {
+                int language = livraTts.setLanguage(new Locale("es", "AR"));
+                livraTtsReady = language != TextToSpeech.LANG_MISSING_DATA && language != TextToSpeech.LANG_NOT_SUPPORTED;
+                livraTts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override public void onStart(String id) {}
+                    @Override public void onDone(String id) { runOnUiThread(() -> { if (webView != null) webView.evaluateJavascript("window.LIVRAOnNativeTTSComplete && window.LIVRAOnNativeTTSComplete()", null); }); }
+                    @Override public void onError(String id) { runOnUiThread(() -> { if (webView != null) webView.evaluateJavascript("window.LIVRAOnNativeTTSError && window.LIVRAOnNativeTTSError()", null); }); }
+                });
+            }
+        });
         webView = new WebView(this);
         webView.setBackgroundColor(Color.rgb(6, 26, 59));
         WebSettings settings = webView.getSettings();
@@ -103,6 +119,8 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void resumeRecording() { livraPaused = false; }
         @JavascriptInterface public void start() { runOnUiThread(() -> startNativeRecognition()); }
         @JavascriptInterface public void stop() { runOnUiThread(() -> stopNativeRecognition()); }
+        @JavascriptInterface public void speakText(String text) { runOnUiThread(() -> speakNativeText(text)); }
+        @JavascriptInterface public void stopSpeech() { runOnUiThread(() -> { if (livraTts != null) livraTts.stop(); }); }
     }
 
 
@@ -218,6 +236,17 @@ public class MainActivity extends Activity {
         livraCaptureThread = null;
     }
 
+    private void speakNativeText(String text) {
+        if (livraTts == null || !livraTtsReady) {
+            if (webView != null) webView.evaluateJavascript("window.LIVRAOnNativeTTSError && window.LIVRAOnNativeTTSError()", null);
+            return;
+        }
+        String content = text == null ? "" : text.trim();
+        if (content.isEmpty()) return;
+        Bundle params = new Bundle();
+        livraTts.speak(content, TextToSpeech.QUEUE_FLUSH, params, "LIVRA_BOOK_" + System.currentTimeMillis());
+    }
+
     private void startNativeRecognition() {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "LIVRA necesita permiso de micrófono.", Toast.LENGTH_LONG).show();
@@ -327,6 +356,7 @@ public class MainActivity extends Activity {
         livraRecording.set(false);
         cleanupLivraAudio();
         stopNativeRecognition();
+        if (livraTts != null) { livraTts.stop(); livraTts.shutdown(); livraTts = null; livraTtsReady = false; }
         if (webView != null) { webView.removeJavascriptInterface("LIVRAAndroidSpeech"); webView.destroy(); webView = null; }
         super.onDestroy();
     }
