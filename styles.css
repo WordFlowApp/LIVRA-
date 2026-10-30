@@ -463,3 +463,40 @@ footer{color:#9dbce3}
 #reader .book-page-frame{min-height:0}
 #reader .reader-page p{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#c3a35e transparent;padding-right:3px}
 #reader .reader-page p:focus{outline:2px solid #c3a35e;outline-offset:2px}
+
+
+/* LIVRA 4.0 — immersive, full-screen editorial reading experience */
+body.reader-open{overflow:hidden;background:#111827}
+body.reader-open>.topbar,body.reader-open>footer{display:none!important}
+body.reader-open>main{position:fixed;inset:0;width:100%;max-width:none;height:100vh;height:100dvh;min-height:0;margin:0;padding:0;overflow:hidden;z-index:50;background:#17243a}
+#reader.screen{display:none}
+#reader.screen.active{position:fixed;inset:0;z-index:60;width:100%;height:100vh;height:100dvh;min-height:0;margin:0;padding:0;gap:0;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;background:linear-gradient(135deg,#f5ecd9,#fffdf6 42%,#eee2c9);color:#19263b}
+.reader-toolbar{height:54px;min-height:54px;flex:0 0 54px;padding:0 max(14px,env(safe-area-inset-left)) 0 max(14px,env(safe-area-inset-left));display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:linear-gradient(180deg,#102b50,#0a1d38);color:#f7e7bd;box-shadow:0 3px 14px #0003;z-index:5}
+.reader-tool{border:1px solid rgba(191,157,94,.5);border-radius:22px;background:rgba(255,255,255,.08);color:inherit;min-height:38px;padding:6px 13px;font-size:15px;font-weight:750;display:flex;align-items:center;justify-content:center;gap:7px}
+.reader-toolbar #readerBack{justify-self:start;font-size:18px}
+.reader-brand{font-family:Georgia,serif;font-size:12px;letter-spacing:3px;font-weight:800;color:#f2d58e}
+.reader-share{justify-self:end;width:40px;height:40px;padding:0;border-radius:50%;font-size:21px}
+#reader .reader-cover{display:none!important}
+#reader .reader-page{position:relative;flex:1 1 auto;min-height:0;width:100%;margin:0;padding:0;border-radius:0;overflow:hidden;background:#fffdf6;color:#202b3d;box-shadow:none}
+#reader .book-running-title{height:30px;min-height:30px;padding:8px 18px 5px;border-bottom:1px solid #e4d7bd;font-family:system-ui,sans-serif;font-size:9px;letter-spacing:2px;color:#92794e}
+#reader .book-page-frame{height:100%;min-height:0;border:0;border-radius:0;padding:clamp(18px,5vw,32px) clamp(22px,6vw,38px) max(14px,env(safe-area-inset-bottom));background:linear-gradient(90deg,rgba(160,130,83,.035),transparent 8%,transparent 92%,rgba(160,130,83,.035)),repeating-linear-gradient(0deg,#fffdf8,#fffdf8 31px,#f4eee3 32px);box-shadow:inset 1px 0 0 #eee4d4,inset -1px 0 0 #eee4d4}
+#reader .book-page-frame:before{content:"";font-size:10px;letter-spacing:5px;margin-bottom:clamp(14px,3vh,26px)}
+#reader .book-page-frame:after{content:"";display:none}
+#reader .page-label{font-family:system-ui,sans-serif;font-size:10px;letter-spacing:2.6px;color:#987b48;margin:0 0 12px}
+#reader .reader-page h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(25px,7vw,34px);font-weight:700;line-height:1.15;letter-spacing:-.35px;color:#17263d;margin:0 0 clamp(16px,3vh,26px);text-align:left}
+#reader .reader-page p{font-family:Georgia,"Times New Roman",serif;font-size:clamp(19px,5.1vw,23px);line-height:1.68;letter-spacing:.05px;color:#283447;text-align:left;margin:0;overflow-y:auto;min-height:0;flex:1 1 auto;white-space:pre-wrap;scrollbar-width:none;padding:0 2px 18px}
+#reader .reader-page p::-webkit-scrollbar{display:none}
+#reader .page-image{max-height:24%;margin:0 auto 14px}
+#reader .book-page-footer{font-family:Georgia,serif;font-size:11px;letter-spacing:.4px;color:#9a8359;border-top:1px solid #e1d4bb;padding-top:9px;margin-top:8px}
+.reader-navigation{height:42px;min-height:42px;flex:0 0 42px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:2px 14px;background:#f3ead8;color:#4a3d2c}
+.reader-navigation .control-button{min-height:32px;height:32px;padding:3px 8px;border:1px solid #c8b58f;border-radius:18px;background:transparent;color:#51432f;box-shadow:none;font-family:system-ui,sans-serif;font-size:11px;letter-spacing:.5px}
+.reader-navigation span{font-family:system-ui,sans-serif;font-size:11px;color:#806d4b;font-weight:750}
+.reader-bottom-tools{height:58px;min-height:58px;flex:0 0 58px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 14px max(6px,env(safe-area-inset-bottom));background:#0a1d38}
+.reader-bottom-tools .reader-tool{min-width:0;flex:1;border-color:#b99b61;background:#152f51;color:#f5e5c3;font-size:13px;min-height:38px}
+.reader-bottom-tools .reader-audio{background:linear-gradient(120deg,#e83c55,#bd1534);border-color:#ff8a9c;color:white}
+.reader-bottom-tools .audiobook-stop{background:#51263a;border-color:#d77d91}
+#reader #retryCover{max-width:100px}
+#reader .hidden{display:none!important}
+#reader #pageText{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@media(min-width:700px){#reader .book-page-frame{max-width:760px;margin:0 auto;padding-left:72px;padding-right:72px}#reader .reader-page{background:#e8dfce}#reader .book-page-frame{background:linear-gradient(90deg,#fffdf6,#fffdfb 50%,#fffdf6);box-shadow:0 0 30px #8c795a24}}
+@media(max-height:680px){.reader-toolbar{height:46px;min-height:46px;flex-basis:46px}.reader-navigation{height:36px;min-height:36px;flex-basis:36px}#reader .book-page-frame{padding-top:14px}#reader .reader-page h2{font-size:24px;margin-bottom:12px}#reader .reader-page p{font-size:18px;line-height:1.48}.reader-bottom-tools{height:52px;min-height:52px;flex-basis:52px}}
