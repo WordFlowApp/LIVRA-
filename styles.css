@@ -364,3 +364,19 @@ footer{flex:0 0 34px;height:34px;overflow:hidden;padding:7px 8px 4px}
 #audioFiles .image-picker-label{position:relative;display:flex;align-items:center;justify-content:center;min-height:54px;font-size:clamp(15px,4vw,19px);cursor:pointer}
 #audioFiles .image-picker-input{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;opacity:0!important}
 #imageSelectionStatus{font-size:13px;line-height:1.25}
+
+
+/* LIVRA 3.7 — biblioteca definitiva para móvil: dos portadas por fila */
+#library .book-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px;overflow-y:auto;overscroll-behavior:contain;align-content:start;padding:4px 2px 18px;scrollbar-width:thin;}
+#library .book-card{gap:0;}
+#library .book-cover{aspect-ratio:2/3;border-radius:12px;padding:12px 10px 14px;gap:9px;box-shadow:0 10px 24px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.14);}
+#library .book-cover-title{font-size:clamp(17px,4.8vw,25px)!important;line-height:1.12!important;-webkit-line-clamp:4;max-height:4.6em;}
+#library .book-cover-meta{font-size:10px!important;letter-spacing:.7px;}
+#library .book-cover-logo{width:30px!important;height:30px!important;top:10px;left:10px;}
+#library .book-cover-placeholder{position:absolute;top:25%;left:50%;transform:translate(-50%,-50%);font-family:Georgia,serif;font-size:clamp(64px,18vw,100px);line-height:1;color:rgba(255,239,190,.82);text-shadow:0 5px 22px rgba(0,0,0,.28);z-index:2;pointer-events:none;}
+#library .book-cover-shade{background:linear-gradient(180deg,rgba(4,16,38,.02),rgba(4,16,38,.06) 34%,rgba(4,16,38,.78) 76%,rgba(4,16,38,.96));}
+#library .library-brand-heading{padding-bottom:10px;border-bottom:1px solid rgba(233,199,106,.28);}
+#library .library-brand-lockup>img{width:48px;height:48px;flex-basis:48px;}
+#library .library-brand-lockup h1{font-size:clamp(29px,7vw,38px);}
+#library .library-brand-lockup .subtitle{font-size:13px;}
+@media(max-height:650px){#library .book-grid{gap:12px 10px;}#library .book-cover{padding:8px 7px 10px;}#library .book-cover-title{font-size:17px!important;}}
