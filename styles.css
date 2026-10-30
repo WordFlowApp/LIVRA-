@@ -572,3 +572,18 @@ body{background:radial-gradient(ellipse at 50% -8%,#244665 0,transparent 48%),li
 .reader-bottom-tools .reader-tool{background:#173653;border-color:#c4a66a;color:#f8f0df}
 .reader-bottom-tools .reader-audio{background:linear-gradient(120deg,#bd4d5c,#842b3c);border-color:#e69ba3}
 footer{color:#8fa7b8}
+
+
+/* LIVRA 4.5 — library covers: artwork-first, legible, premium shelf */
+#library .book-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(14px,4vw,22px);row-gap:18px;padding:18px 8px 26px;background:repeating-linear-gradient(180deg,transparent 0,transparent 236px,rgba(184,133,82,.34) 237px,rgba(232,190,133,.55) 242px,rgba(91,51,29,.8) 248px,transparent 255px)}
+#library .book-card{width:100%;min-width:0;padding:0 0 14px;align-self:stretch;display:block;background:transparent;border:0;text-align:initial}
+#library .book-cover{width:100%;aspect-ratio:2/3;min-height:0;padding:12px 9px 14px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:linear-gradient(145deg,#29445b,#101d2b);isolation:isolate;transform:translateZ(0)}
+#library .book-cover-photo{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;z-index:0!important;opacity:1!important}
+#library .book-cover-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,13,24,.08) 15%,rgba(5,13,24,.12) 42%,rgba(5,13,24,.88) 100%);z-index:1}
+#library .book-cover-logo{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 2px 5px #0009)}
+#library .book-cover-title{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;width:100%;font-size:clamp(15px,4vw,21px)!important;line-height:1.12!important;text-align:center;color:#fff8e8!important;text-wrap:balance;text-shadow:0 2px 8px #000!important}
+#library .book-cover-meta{font-size:9px!important;color:#f1dfbd!important;text-align:center;text-shadow:0 1px 5px #000}
+#library .book-cover-placeholder{position:absolute;inset:0;z-index:0;display:grid;place-items:center;font-size:54px;color:#f0d69b;background:radial-gradient(circle at 50% 35%,#42617a,#14283d 70%);opacity:.9}
+#library .book-card:focus-visible .book-cover{outline:3px solid #f0d69b;outline-offset:3px}
+#library .book-card:active .book-cover{transform:translateY(2px) scale(.985)}
+@media(max-width:360px){#library .book-grid{column-gap:11px;padding-left:3px;padding-right:3px}#library .book-cover{padding:9px 7px 11px}}
