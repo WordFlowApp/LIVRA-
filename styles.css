@@ -500,3 +500,28 @@ body.reader-open>main{position:fixed;inset:0;width:100%;max-width:none;height:10
 #reader #pageText{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 @media(min-width:700px){#reader .book-page-frame{max-width:760px;margin:0 auto;padding-left:72px;padding-right:72px}#reader .reader-page{background:#e8dfce}#reader .book-page-frame{background:linear-gradient(90deg,#fffdf6,#fffdfb 50%,#fffdf6);box-shadow:0 0 30px #8c795a24}}
 @media(max-height:680px){.reader-toolbar{height:46px;min-height:46px;flex-basis:46px}.reader-navigation{height:36px;min-height:36px;flex-basis:36px}#reader .book-page-frame{padding-top:14px}#reader .reader-page h2{font-size:24px;margin-bottom:12px}#reader .reader-page p{font-size:18px;line-height:1.48}.reader-bottom-tools{height:52px;min-height:52px;flex-basis:52px}}
+
+
+/* LIVRA 4.0 — a real wooden library, with reserved book-shaped spaces */
+#library.screen.active{background:linear-gradient(180deg,rgba(18,34,54,.1),rgba(8,17,29,.38)),repeating-linear-gradient(90deg,#422315 0,#57301b 8px,#633820 15px,#492719 24px);border-radius:0;padding:16px 14px 22px;position:relative;isolation:isolate}
+#library.screen.active:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.28),transparent 9%,transparent 91%,rgba(0,0,0,.3)),radial-gradient(ellipse at 50% 0%,rgba(255,207,127,.16),transparent 55%)}
+#library .library-brand-heading{background:linear-gradient(110deg,rgba(24,14,10,.88),rgba(62,35,20,.9));border:1px solid rgba(230,185,112,.55);border-radius:14px;padding:12px 12px 10px;box-shadow:0 7px 18px #0006,inset 0 1px #f9d9a333}
+#library .library-brand-lockup h1{font-family:Georgia,"Times New Roman",serif;color:#ffe8bd;text-shadow:0 2px 6px #000}
+#library .library-brand-lockup .subtitle{color:#e3c49a}
+#library .library-brand-tag{color:#f6d28c;letter-spacing:2.4px}
+#library .book-grid{position:relative;align-content:start;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 15px;padding:16px 9px 21px;background:repeating-linear-gradient(180deg,transparent 0,transparent 236px,#a96c3d 237px,#d69a5b 242px,#65391f 248px,transparent 254px);filter:drop-shadow(0 7px 8px #0005)}
+#library .book-card{padding:0 0 16px;position:relative;align-self:end;filter:drop-shadow(4px 5px 5px #160d08aa)}
+#library .book-cover{position:relative;aspect-ratio:2/3;border-radius:4px 9px 9px 4px;border:1px solid rgba(246,222,177,.8);padding:14px 10px 15px;box-shadow:inset 5px 0 8px rgba(0,0,0,.25),inset -2px 0 3px #fff3,3px 5px 9px #0007;overflow:hidden}
+#library .book-card:not(.book-card-placeholder) .book-cover:after{content:"";position:absolute;inset:0 auto 0 5px;width:5px;background:linear-gradient(90deg,#0005,#fff3,#0002);z-index:5}
+#library .book-cover-photo{border-radius:2px 7px 7px 2px}
+#library .book-cover-title{font-family:Georgia,"Times New Roman",serif!important;text-transform:none;text-shadow:0 2px 6px #0008}
+#library .book-cover-meta{letter-spacing:1px}
+#library .book-card-placeholder{pointer-events:none}
+#library .empty-book-cover{background:linear-gradient(105deg,#a56c3c,#d5a36b 10%,#7c482a 16%,#3e261b 100%);border:1px dashed #e9c58e;box-shadow:inset 7px 0 12px #160b08aa,inset -2px 0 2px #ffe1a155,5px 8px 12px #0008;justify-content:center;gap:12px}
+#library .empty-book-spine{position:absolute;inset:0 auto 0 0;width:12px;background:linear-gradient(90deg,#3c2116,#b47b4b 50%,#4c2a1a);border-right:1px solid #e7bd7e88}
+#library .empty-book-icon{font-family:Georgia,serif;font-size:42px;color:#f2d69f;text-shadow:0 2px 9px #0008}
+#library .empty-book-cover .book-cover-title{font-size:clamp(17px,4.3vw,22px)!important;line-height:1.2;color:#ffebc9;letter-spacing:1px}
+#library .amazon-button{background:linear-gradient(120deg,#2d1b13,#58351f);border-color:#d6a96d;color:#ffe4b4}
+#library #libraryRecord{margin-top:4px}
+#library #libraryHome{color:#f4d7ad;border-color:#c4935e}
+@media(max-height:700px){#library .book-grid{padding-top:8px}#library .book-card{padding-bottom:10px}}
