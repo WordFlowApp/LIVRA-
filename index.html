@@ -7,11 +7,11 @@
 <meta name="description" content="LIVRA transforma tu voz en libros.">
 <link rel="manifest" href="./manifest.webmanifest?v=20">
 <link rel="icon" href="./icons/livra.svg?v=20" type="image/svg+xml">
-<link rel="stylesheet" href="./styles.css?v=46">
+<link rel="stylesheet" href="./styles.css?v=47">
 <title>LIVRA — Tu voz, tu libro</title>
 </head>
 <body>
-<header class="topbar"><span class="brand-mark" aria-hidden="true">L</span><strong>LIVRA</strong></header>
+<header class="topbar"><span class="brand-mark" aria-hidden="true">L</span><strong>LIVRA</strong><button id="globalLibrary" class="global-library-button" type="button" aria-label="Abrir mi biblioteca" title="Mi biblioteca">▤</button></header>
 <main>
 <section id="home" class="screen active">
   <img class="hero-icon" src="./icons/livra.svg?v=20" alt="">
@@ -68,10 +68,10 @@
     </div>
   </article>
   <div class="reader-navigation"><button id="prevPage" class="control-button pause">← ANTERIOR</button><span id="pageCount">1 / 1</span><button id="nextPage" class="control-button pause">SIGUIENTE →</button></div>
-  <button id="listenBook" class="big-button library-home">🔊 ESCUCHAR EL LIBRO</button>
+  <div class="reader-actions"><button id="readBook" class="big-button library-home">📖 LEER LIBRO</button><button id="listenBook" class="big-button record-home">🎧 ESCUCHAR AUDIOLIBRO</button></div><button id="stopAudiobook" class="quiet-button audiobook-stop hidden">■ DETENER AUDIO</button><button id="retryCover" class="quiet-button hidden">🎨 GENERAR TAPA DEL LIBRO</button>
 </section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </main>
 <footer>Tu voz. Tu historia. Tu libro.</footer>
-<script src="./app.js?v=49"></script>
+<script src="./app.js?v=50"></script>
 </body></html>
