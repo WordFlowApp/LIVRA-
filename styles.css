@@ -479,7 +479,7 @@ body.reader-open>main{position:fixed;inset:0;width:100%;max-width:none;height:10
 #reader .reader-cover{display:none!important}
 #reader .reader-page{position:relative;flex:1 1 auto;min-height:0;width:100%;margin:0;padding:0;border-radius:0;overflow:hidden;background:#fffdf6;color:#202b3d;box-shadow:none}
 #reader .book-running-title{height:30px;min-height:30px;padding:8px 18px 5px;border-bottom:1px solid #e4d7bd;font-family:system-ui,sans-serif;font-size:9px;letter-spacing:2px;color:#92794e}
-#reader .book-page-frame{height:100%;min-height:0;border:0;border-radius:0;padding:clamp(18px,5vw,32px) clamp(22px,6vw,38px) max(14px,env(safe-area-inset-bottom));background:linear-gradient(90deg,rgba(160,130,83,.035),transparent 8%,transparent 92%,rgba(160,130,83,.035)),repeating-linear-gradient(0deg,#fffdf8,#fffdf8 31px,#f4eee3 32px);box-shadow:inset 1px 0 0 #eee4d4,inset -1px 0 0 #eee4d4}
+#reader .book-page-frame{height:calc(100% - 30px);min-height:0;border:0;border-radius:0;padding:clamp(18px,5vw,32px) clamp(22px,6vw,38px) max(14px,env(safe-area-inset-bottom));background:linear-gradient(90deg,rgba(160,130,83,.035),transparent 8%,transparent 92%,rgba(160,130,83,.035)),repeating-linear-gradient(0deg,#fffdf8,#fffdf8 31px,#f4eee3 32px);box-shadow:inset 1px 0 0 #eee4d4,inset -1px 0 0 #eee4d4}
 #reader .book-page-frame:before{content:"";font-size:10px;letter-spacing:5px;margin-bottom:clamp(14px,3vh,26px)}
 #reader .book-page-frame:after{content:"";display:none}
 #reader .page-label{font-family:system-ui,sans-serif;font-size:10px;letter-spacing:2.6px;color:#987b48;margin:0 0 12px}
