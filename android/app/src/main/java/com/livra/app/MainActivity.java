@@ -25,6 +25,8 @@ import android.speech.tts.UtteranceProgressListener;
 import java.util.Locale;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
+import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient.FileChooserParams;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -35,6 +37,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private static final int REQUEST_AUDIO = 2101;
+    private static final int REQUEST_FILE_CHOOSER = 2102;
+    private ValueCallback<android.net.Uri[]> pendingFileChooser;
     private static final String APP_URL = "https://wordflowapp.github.io/LIVRA-/";
     private WebView webView;
     private SpeechRecognizer recognizer;
@@ -78,6 +82,18 @@ public class MainActivity extends Activity {
         webView.clearCache(true);
         webView.addJavascriptInterface(new SpeechBridge(), "LIVRAAndroidSpeech");
         webView.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView view, ValueCallback<android.net.Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (pendingFileChooser != null) pendingFileChooser.onReceiveValue(null);
+                pendingFileChooser = filePathCallback;
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("audio/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/*", "application/octet-stream", "video/mp4"});
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try { startActivityForResult(intent, REQUEST_FILE_CHOOSER); }
+                catch (Exception e) { pendingFileChooser = null; filePathCallback.onReceiveValue(null); Toast.makeText(MainActivity.this, "No se pudo abrir el selector de grabaciones.", Toast.LENGTH_LONG).show(); }
+                return true;
+            }
             @Override public void onPermissionRequest(android.webkit.PermissionRequest request) {
                 runOnUiThread(() -> {
                     String originHost = request.getOrigin() == null ? "" : request.getOrigin().getHost();
@@ -364,6 +380,18 @@ public class MainActivity extends Activity {
         if (!granted) Toast.makeText(this, "Para grabar y transcribir, permití el micrófono de LIVRA.", Toast.LENGTH_LONG).show();
     }
 
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_FILE_CHOOSER) {
+            if (pendingFileChooser != null) {
+                android.net.Uri[] results = null;
+                if (resultCode == RESULT_OK && data != null && data.getData() != null) results = new android.net.Uri[]{data.getData()};
+                pendingFileChooser.onReceiveValue(results);
+                pendingFileChooser = null;
+            }
+        }
+    }
+
     @Override public void onBackPressed() {
         if (webView != null && webView.canGoBack()) webView.goBack();
         else super.onBackPressed();
@@ -374,6 +402,7 @@ public class MainActivity extends Activity {
         cleanupLivraAudio();
         stopNativeRecognition();
         if (livraTts != null) { livraTts.stop(); livraTts.shutdown(); livraTts = null; livraTtsReady = false; }
+        if (pendingFileChooser != null) { pendingFileChooser.onReceiveValue(null); pendingFileChooser = null; }
         if (webView != null) { webView.removeJavascriptInterface("LIVRAAndroidSpeech"); webView.destroy(); webView = null; }
         super.onDestroy();
     }
