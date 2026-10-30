@@ -1,7 +1,7 @@
 const $ = function(id){ return document.getElementById(id); };
 const screens = ["home","recording","audioFiles","library","reader"];
 let recorder=null, stream=null, chunks=[], tickHandle=null, seconds=0, currentBlob=null, savingRecording=false, recognition=null, recognitionWanted=false, finalTranscript="", recordings=[], books=[], selectedAudioIds=new Set(), activeBook=null, bookPages=[], pageIndex=0, audioUrl=null, previewAudio=null;
-function show(id){ screens.forEach(function(s){ $(s).classList.toggle("active",s===id); }); if(id==="audioFiles") renderRecordings(); if(id==="library") renderLibrary(); window.scrollTo(0,0); }
+function show(id){ screens.forEach(function(s){ $(s).classList.toggle("active",s===id); }); document.body.classList.toggle("reader-open",id==="reader"); if(id==="audioFiles") renderRecordings(); if(id==="library") renderLibrary(); window.scrollTo(0,0); }
 function toast(message){ const el=$("toast"); el.textContent=message; el.classList.add("show"); window.clearTimeout(toast.timer); toast.timer=window.setTimeout(function(){el.classList.remove("show");},3200); }
 function formatTime(n){return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");}
 function startTimer(){stopTimer();tickHandle=window.setInterval(function(){seconds++;$("timer").textContent=formatTime(seconds);},1000);}
