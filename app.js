@@ -173,5 +173,37 @@ $("listenBook").addEventListener("click",function(){if(audiobookPlaying){audiobo
 $("stopAudiobook").addEventListener("click",function(){stopAudiobook(true);});
 
 window.addEventListener("pagehide",function(){stopTimer();stopRecognition();releaseStream();stopPreview();});
+
+/* LIVRA 4.5 — recover covers for books created before AI cover generation */
+const renderLibraryWithoutCoverRecovery=renderLibrary;
+let livraCoverRecoveryRunning=false;
+async function recoverMissingBookCovers(){
+ if(livraCoverRecoveryRunning)return;
+ livraCoverRecoveryRunning=true;
+ try{
+  const saved=await getAll("books");
+  const missing=saved.filter(function(book){return !book.coverImage;});
+  for(const book of missing){
+   const brief=[book.subtitle,book.summary,book.prologue,(book.pages||[]).filter(function(page){return page.section==="chapter";}).slice(0,3).map(function(page){return page.body;}).join("\n\n"),book.transcript].filter(Boolean).join("\n\n").slice(0,1800);
+   if(!brief)continue;
+   try{
+    const imageData=await generateAICover(book.title||"Mi historia",brief);
+    book.coverImage=imageData;
+    await putItem("books",book);
+    renderLibraryWithoutCoverRecovery();
+   }catch(error){
+    console.warn("LIVRA: no se pudo recuperar la tapa de",book.title,error);
+    break;
+   }
+  }
+ }catch(error){console.warn("LIVRA: no se pudieron revisar las tapas pendientes",error);}
+ finally{livraCoverRecoveryRunning=false;}
+}
+renderLibrary=function(){
+ renderLibraryWithoutCoverRecovery();
+ recoverMissingBookCovers();
+};
+/* Fin de recuperación automática de portadas */
+
 // LIVRA 3.3: start with two clear choices; the library is one tap away.
 show("home");
