@@ -122,6 +122,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void stop() { runOnUiThread(() -> stopNativeRecognition()); }
         @JavascriptInterface public void speakText(String text) { runOnUiThread(() -> speakNativeText(text)); }
         @JavascriptInterface public void stopSpeech() { runOnUiThread(() -> { if (livraTts != null) livraTts.stop(); }); }
+        @JavascriptInterface public void shareBook(String title, String text) { runOnUiThread(() -> shareNativeBook(title, text)); }
     }
 
 
@@ -235,6 +236,21 @@ public class MainActivity extends Activity {
         try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {} livraSpeechPipe = null;
         if (livraAudioPipe != null) { try { livraAudioPipe[0].close(); } catch (Exception ignored) {} try { livraAudioPipe[1].close(); } catch (Exception ignored) {} livraAudioPipe = null; }
         livraCaptureThread = null;
+    }
+
+    private void shareNativeBook(String title, String text) {
+        String safeTitle = (title == null || title.trim().isEmpty()) ? "Mi libro" : title.trim();
+        String content = text == null ? "" : text.trim();
+        if (content.isEmpty()) {
+            Toast.makeText(this, "El libro no tiene contenido para compartir.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent send = new Intent(Intent.ACTION_SEND);
+        send.setType("text/plain");
+        send.putExtra(Intent.EXTRA_SUBJECT, safeTitle + " · LIVRA");
+        send.putExtra(Intent.EXTRA_TITLE, safeTitle);
+        send.putExtra(Intent.EXTRA_TEXT, content);
+        startActivity(Intent.createChooser(send, "Compartir " + safeTitle));
     }
 
     private void speakNativeText(String text) {
