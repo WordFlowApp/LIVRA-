@@ -30,7 +30,7 @@ export default {
           "Composition: vertical portrait 2:3 book-cover artwork, one dominant focal subject, elegant depth, calm negative space near the upper and lower thirds for title and author placement later. Fill the canvas edge to edge.",
           "Do not include text, letters, numbers, typography, title, author name, logo, border, frame, book mockup, hands holding a book, or watermark.",
           "The result must feel specific, moving, polished and worthy of a professionally edited book."
-        ].join("\\n\\n");
+        ].join("\n\n");
         const result = await env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt });
         let imageBytes;
         if (result instanceof Uint8Array) {
@@ -69,10 +69,10 @@ export default {
           "CAPÍTULOS: escribí prosa continua, con párrafos desarrollados, imágenes y recursos narrativos solo cuando nazcan naturalmente del material. Evitá listas, moralejas agregadas, subtítulos internos innecesarios y frases que suenen a IA. Cada capítulo debe avanzar la historia o profundizar una idea. Cerrá el libro con intención, no de golpe.",
           "TÍTULO: elegí un título literario memorable y fiel al contenido. El subtítulo debe aclarar la promesa del libro sin sonar publicitario.",
           "CONTROL DE CALIDAD: comprobá coherencia entre título, prólogo y capítulos; que el prólogo tenga detalles específicos de la fuente; que los capítulos no se repitan; que no haya datos inventados, relleno, frases genéricas, texto incompleto ni marcadores. La redacción debe sentirse escrita y editada por una persona con oficio.",
-          "FORMATO: devolvé SOLO JSON válido, sin Markdown ni comentarios, con esta estructura exacta: {\\"title\\":\\"...\\",\\"subtitle\\":\\"...\\",\\"summary\\":\\"...\\",\\"prologue\\":\\"...\\",\\"chapters\\":[{\\"title\\":\\"...\\",\\"text\\":\\"...\\"}]}",
+          "FORMATO: devolvé SOLO JSON válido, sin Markdown ni comentarios. El objeto debe tener las claves title, subtitle, summary, prologue y chapters; chapters debe ser un array de objetos con title y text.",
           "Título de referencia, solo si encaja: " + requestedTitle,
-          "TRANSCRIPCIÓN ORIGINAL — FUENTE DE VERDAD:\\n" + source
-        ].join("\\n\\n");
+          "TRANSCRIPCIÓN ORIGINAL — FUENTE DE VERDAD:\n" + source
+        ].join("\n\n");
         const result = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
           messages: [
             { role: "system", content: "Sos una escritora y editora literaria de primer nivel, especializada en convertir relatos orales en libros breves y publicables en español rioplatense. Tu prioridad es la fidelidad, la calidad narrativa, un prólogo específico y capítulos con progresión. Nunca inventes hechos. Respondé únicamente JSON válido." },
