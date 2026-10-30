@@ -21,7 +21,16 @@ export default {
         const title = String(payload && payload.title || "Mi historia").trim().slice(0, 160);
         const source = String(payload && payload.text || "").trim().slice(0, 1800);
         if (!source) return Response.json({ error: "Book text is required." }, { status: 400, headers: cors });
-        const prompt = "Create a beautiful, professional, literary book cover illustration inspired by this personal story. Theme: " + title + ". Story: " + source + ". Premium bookstore cover art, emotionally resonant editorial illustration, clear central metaphor, cinematic lighting, refined deep blue and warm gold palette, portrait 2:3 composition. No text, letters, typography, logos, watermark, or mockup. One standalone illustration only.";
+        const prompt = [
+          "Create a premium, emotionally resonant FRONT-COVER ILLUSTRATION for a real book that will be sold in bookstores.",
+          "Book title (for visual inspiration only; do not write it): " + title,
+          "Edited book essence: " + source,
+          "Understand the actual subject, people, place, atmosphere and emotional heart of this edited book. Build one memorable visual scene or poetic metaphor that clearly belongs to THIS story, never a generic stock image.",
+          "Art direction: sophisticated literary publishing, beautiful painterly editorial illustration with realistic details, cinematic natural light, strong visual composition, rich but tasteful colors, subtle texture, professional art direction.",
+          "Composition: vertical portrait 2:3 book-cover artwork, one dominant focal subject, elegant depth, calm negative space near the upper and lower thirds for title and author placement later. Fill the canvas edge to edge.",
+          "Do not include text, letters, numbers, typography, title, author name, logo, border, frame, book mockup, hands holding a book, or watermark.",
+          "The result must feel specific, moving, polished and worthy of a professionally edited book."
+        ].join("\\n\\n");
         const result = await env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt });
         let imageBytes;
         if (result instanceof Uint8Array) {
@@ -49,22 +58,30 @@ export default {
         if (source.length < 80) return Response.json({ error: "La historia necesita al menos 80 caracteres para poder editarse como libro." }, { status: 400, headers: cors });
         if (source.length > 24000) return Response.json({ error: "La historia es demasiado larga para una sola edición. Dividila en grabaciones más cortas." }, { status: 413, headers: cors });
         const prompt = [
-          "Sos una escritora y editora literaria profesional en español rioplatense. Tu trabajo NO es transcribir ni resumir: es convertir el material hablado en un libro breve, atractivo y publicable, con voz narrativa, escenas claras, ritmo, sensibilidad, humor o emoción cuando el material lo permita.",
-          "Transformá muletillas, repeticiones, frases cortadas y errores de reconocimiento en prosa natural, fluida y elegante. Reordená las ideas para que exista un comienzo que enganche, un desarrollo y un cierre satisfactorio. Usá recursos literarios, imágenes y transiciones con moderación y buen gusto, siempre apoyados en lo que el autor contó.",
-          "Conservá la verdad central, las experiencias, los nombres y los hechos que aparecen en la fuente. No inventes sucesos concretos, personas, diálogos citados, fechas, lugares ni recuerdos. Podés mejorar la forma de narrar y expresar emociones implícitas de manera prudente, sin atribuir hechos nuevos. Si el material es una reflexión o una prueba técnica, convertí eso en un ensayo o crónica personal interesante; no finjas que es una aventura distinta.",
-          "Creá un título literario potente y un subtítulo que prometa el tema real del libro. El resumen debe ser una sinopsis editorial atractiva. El prólogo debe tener contenido específico derivado de la fuente, nunca una plantilla genérica. Desarrollá capítulos con títulos expresivos y texto sustancial; para una fuente corta, hacé una pieza breve y redonda en vez de agregar páginas vacías o relleno. No repitas el mismo texto en resumen, prólogo y capítulos.",
-          "Devolvé SOLO JSON válido, sin Markdown ni comentarios, con esta estructura exacta: {\"title\":\"...\",\"subtitle\":\"...\",\"summary\":\"...\",\"prologue\":\"...\",\"chapters\":[{\"title\":\"...\",\"text\":\"...\"}]}",
-          "Antes de responder, verificá que cada campo sea texto simple, que cada capítulo tenga un título y texto real, que no haya marcadores genéricos y que el resultado esté claramente mejor escrito que la transcripción original.",
-          "Título de referencia, solo si resulta útil: " + requestedTitle,
-          "TRANSCRIPCIÓN ORIGINAL (fuente de verdad):\n" + source
-        ].join("\n\n");
-        const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+          "MISIÓN EDITORIAL: convertí una transcripción de voz en un libro breve, coherente, hermoso y legible, como lo haría una escritora profesional y una editora de una editorial seria. No entregues una transcripción corregida: entregá una OBRA LITERARIA.",
+          "IDIOMA Y VOZ: español argentino/rioplatense natural, cuidado y contemporáneo. Respetá la personalidad, el vocabulario, el humor, la sensibilidad y la mirada del narrador. Evitá el tono robótico, las frases motivacionales prefabricadas, los clichés y la grandilocuencia.",
+          "ETAPA 1 — COMPRENDER: identificá el tema central, quién narra, qué quiere contar, los momentos o ideas decisivas, el conflicto o pregunta que mueve el relato y el tono que mejor le corresponde. Detectá si el material es un cuento, una memoria personal, una autobiografía, una crónica, una reflexión o un ensayo. Elegí el género que realmente surge del audio.",
+          "ETAPA 2 — EDITAR: corregí errores de reconocimiento de voz usando el contexto; eliminá muletillas, redundancias, falsos comienzos y frases rotas; ordená las ideas; uní ideas dispersas; mejorá ritmo, transiciones, precisión, vocabulario y puntuación. Convertí lo oral en prosa clara, expresiva y fluida. No reduzcas todo a un resumen.",
+          "FIDELIDAD: la transcripción es la única fuente de verdad. Conservá nombres, relaciones, lugares, fechas, hechos y sentido. No inventes escenas, acontecimientos, personajes, diálogos textuales ni recuerdos. Reconstruí escenas solo con detalles presentes en la fuente. Si falta un dato, omitilo.",
+          "ARQUITECTURA DEL LIBRO: construí un recorrido con apertura que atrape, desarrollo con progresión y cierre satisfactorio. Creá entre 2 y 6 capítulos según la cantidad y riqueza del material. Cada capítulo debe tener un propósito propio, un título atractivo y desarrollo real; no dividas artificialmente un texto corto ni repitas párrafos. Si el audio cuenta un cuento, conservá su trama y dale forma de cuento literario con escenas, tensión y desenlace. Si es una historia real, tratala como memoria o crónica, sin ficcionalizarla.",
+          "PRÓLOGO — PRIORIDAD MÁXIMA: escribí un prólogo genuino, íntimamente conectado con ESTA historia. Debe nacer de una imagen, pregunta, tensión, recuerdo o idea concreta de la transcripción. Presentá al lector el corazón del libro y por qué vale la pena entrar en él, con voz literaria cálida y segura. No uses fórmulas como 'este libro es un viaje', 'en estas páginas descubrirás' ni introducciones genéricas. No inventes un episodio para hacerlo emotivo. El prólogo debe aportar una mirada editorial nueva y no repetir el resumen ni anticipar todo el contenido. Usá 3 a 5 párrafos sustanciosos cuando la fuente lo permita; si es breve, escribí uno más corto y preciso.",
+          "RESUMEN: redactá una sinopsis editorial atractiva y concreta, sin revelar necesariamente el final. Describí el tema real y despertá interés. No repitas el prólogo.",
+          "CAPÍTULOS: escribí prosa continua, con párrafos desarrollados, imágenes y recursos narrativos solo cuando nazcan naturalmente del material. Evitá listas, moralejas agregadas, subtítulos internos innecesarios y frases que suenen a IA. Cada capítulo debe avanzar la historia o profundizar una idea. Cerrá el libro con intención, no de golpe.",
+          "TÍTULO: elegí un título literario memorable y fiel al contenido. El subtítulo debe aclarar la promesa del libro sin sonar publicitario.",
+          "CONTROL DE CALIDAD: comprobá coherencia entre título, prólogo y capítulos; que el prólogo tenga detalles específicos de la fuente; que los capítulos no se repitan; que no haya datos inventados, relleno, frases genéricas, texto incompleto ni marcadores. La redacción debe sentirse escrita y editada por una persona con oficio.",
+          "FORMATO: devolvé SOLO JSON válido, sin Markdown ni comentarios, con esta estructura exacta: {\\"title\\":\\"...\\",\\"subtitle\\":\\"...\\",\\"summary\\":\\"...\\",\\"prologue\\":\\"...\\",\\"chapters\\":[{\\"title\\":\\"...\\",\\"text\\":\\"...\\"}]}",
+          "Título de referencia, solo si encaja: " + requestedTitle,
+          "TRANSCRIPCIÓN ORIGINAL — FUENTE DE VERDAD:\\n" + source
+        ].join("\\n\\n");
+        const result = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
           messages: [
-            { role: "system", content: "Sos una autora y editora literaria profesional. Transformá la fuente en una obra bien narrada, fiel a los hechos y sin relleno. Respondé únicamente JSON válido con todos los campos de texto como strings." },
+            { role: "system", content: "Sos una escritora y editora literaria de primer nivel, especializada en convertir relatos orales en libros breves y publicables en español rioplatense. Tu prioridad es la fidelidad, la calidad narrativa, un prólogo específico y capítulos con progresión. Nunca inventes hechos. Respondé únicamente JSON válido." },
             { role: "user", content: prompt }
           ],
-          max_tokens: 7000,
-          temperature: 0.65
+          max_tokens: 8500,
+          temperature: 0.72,
+          top_p: 0.9,
+          repetition_penalty: 1.08
         });
         let raw = String(result && result.response || "").trim();
         raw = raw.replace(/^\x60\x60\x60(?:json)?\s*/i, "").replace(/\s*\x60\x60\x60$/, "");
@@ -93,7 +110,7 @@ export default {
           text: textValue(ch && (ch.text ?? ch.content ?? ch.body))
         })).filter(ch => ch.text && ch.text !== "[object Object]");
         if (!chapters.length) throw new Error("No valid chapters returned");
-        return Response.json({ title: title.slice(0, 180), subtitle: subtitle.slice(0, 240), summary, prologue, chapters, model: "@cf/meta/llama-3.1-8b-instruct" }, { headers: cors });
+        return Response.json({ title: title.slice(0, 180), subtitle: subtitle.slice(0, 240), summary, prologue, chapters, model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast" }, { headers: cors });
       } catch (error) {
         return Response.json({ error: "No se pudo editar el libro con IA. Probá otra vez; tu grabación original sigue guardada." }, { status: 502, headers: cors });
       }
