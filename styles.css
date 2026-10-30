@@ -587,3 +587,47 @@ footer{color:#8fa7b8}
 #library .book-card:focus-visible .book-cover{outline:3px solid #f0d69b;outline-offset:3px}
 #library .book-card:active .book-cover{transform:translateY(2px) scale(.985)}
 @media(max-width:360px){#library .book-grid{column-gap:11px;padding-left:3px;padding-right:3px}#library .book-cover{padding:9px 7px 11px}}
+
+
+/* LIVRA 4.6 — keep recording controls visible on mobile */
+#recording{
+  gap:6px;
+  padding-top:0;
+  padding-bottom:4px;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+#recording .screen-heading{min-height:34px;padding:2px 2px 6px}
+#recording .screen-heading h1{font-size:clamp(23px,5.5vw,29px);margin:0}
+#recording .mini-icon{width:40px;height:40px}
+#recording .mic-visual{width:76px;height:76px;min-width:76px;min-height:76px;border-width:3px;box-shadow:0 0 0 4px #e8c77b20,0 0 14px #e8c77b30}
+#recording .mic-glyph{font-size:39px}
+#recording .timer{font-size:clamp(29px,7vw,36px);line-height:1;margin:0}
+#recording .record-state{font-size:14px;min-height:16px;line-height:1.1}
+#recording .waveform{height:18px;flex-basis:18px;min-height:18px}
+#recording .waveform i:nth-child(3n){height:25px}
+#recording .field-label{font-size:16px;line-height:1.2}
+#recording .transcript-edit{
+  flex:1 1 110px;
+  min-height:76px;
+  height:auto;
+  max-height:22svh;
+  resize:none;
+  font-size:16px;
+  line-height:1.35;
+  padding:10px 12px;
+}
+#recording .record-controls{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0}
+#recording .control-button{min-width:0;min-height:54px;padding:6px 3px;font-size:clamp(13px,3.5vw,16px);gap:3px;border-radius:14px}
+#recording .control-button span{font-size:21px}
+#recording #cancelRecording{flex:0 0 auto;min-height:36px;padding:5px 10px;font-size:14px}
+@media(max-height:760px){
+  #recording{gap:4px}
+  #recording .mic-visual{width:64px;height:64px;min-width:64px;min-height:64px}
+  #recording .mic-glyph{font-size:33px}
+  #recording .waveform{height:14px;flex-basis:14px;min-height:14px}
+  #recording .transcript-edit{max-height:17svh;min-height:62px}
+  #recording .control-button{min-height:48px}
+  #recording #cancelRecording{min-height:32px}
+}
