@@ -431,3 +431,28 @@ main{max-width:520px;padding:14px 16px 20px}
 .reader-navigation .control-button{box-shadow:0 5px 0 #0004}
 footer{color:#9dbce3}
 @media(max-height:760px){#home{gap:13px}#home .hero-icon{width:min(36vw,150px)}#home .big-button{min-height:70px}#recording .mic-visual{width:min(42vw,165px);height:min(42vw,165px)}}
+
+
+/* LIVRA 3.9 — audiobook controls, persistent library shortcut and refined home */
+.topbar{display:flex;align-items:center}
+.global-library-button{margin-left:auto;width:42px;height:42px;flex:0 0 42px;border-radius:50%;border:1px solid rgba(255,231,145,.9);background:linear-gradient(145deg,#ffe86b,#e6a91a);color:#09234b;font-size:23px;font-weight:900;display:grid;place-items:center;box-shadow:0 3px 12px #0005}
+.global-library-button:active{transform:scale(.94)}
+#library.active~*{}
+#home{gap:clamp(13px,2.7vh,22px);padding:clamp(12px,3vh,28px) 4px}
+#home .hero-icon{width:min(40vw,180px);max-height:22vh;object-fit:contain}
+#home h1{font-size:clamp(34px,8.1vw,48px);line-height:1.08;letter-spacing:-1.2px;margin:2px 0 12px;font-weight:950}
+#home .big-button{min-height:clamp(74px,10vh,90px);font-size:clamp(23px,6vw,32px);letter-spacing:.2px}
+.reader-actions{display:grid;grid-template-columns:1fr;gap:10px}
+.reader-actions .big-button{min-height:66px;font-size:clamp(19px,5vw,25px)}
+.reader-actions #readBook{background:linear-gradient(120deg,#ffe96b,#ffbf22);color:#08234b;border:1px solid #fff0a3}
+.reader-actions #listenBook{background:linear-gradient(120deg,#ff536b,#df092f);color:#fff;border:1px solid #ff9cac}
+.audiobook-stop{min-height:48px;border-color:#ff8b98;color:#fff;background:#451a35}
+#reader .reader-cover{position:relative;background-size:cover;background-position:center;overflow:hidden}
+#reader .reader-cover h2,#reader .reader-cover p{position:relative;z-index:2;text-shadow:0 2px 10px #000b}
+#reader .reader-cover img{position:relative;z-index:2}
+#retryCover{border-color:#f1d27b;color:#ffe69a}
+.book-cover-photo{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover;z-index:0}
+.book-cover-shade{z-index:1}
+.book-cover-logo,.book-cover-title,.book-cover-meta{position:relative;z-index:3}
+#home .hero-icon{filter:drop-shadow(0 14px 25px #0008) drop-shadow(0 0 12px #28bfff33)}
+@media(max-height:720px){#home{gap:10px;padding:6px 4px}#home .hero-icon{width:min(34vw,135px);max-height:18vh}#home h1{font-size:clamp(30px,7vw,39px);margin:0 0 4px}#home .big-button{min-height:66px}}
