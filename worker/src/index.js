@@ -73,21 +73,8 @@ export default {
           "Título de referencia, solo si encaja: " + requestedTitle,
           "TRANSCRIPCIÓN ORIGINAL — FUENTE DE VERDAD:\n" + source
         ].join("\n\n");
-        const result = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
-          messages: [
-            { role: "system", content: "Sos una escritora y editora literaria de primer nivel, especializada en convertir relatos orales en libros breves y publicables en español rioplatense. Tu prioridad es la fidelidad, la calidad narrativa, un prólogo específico y capítulos con progresión. Nunca inventes hechos. Respondé únicamente JSON válido." },
-            { role: "user", content: prompt }
-          ],
-          max_tokens: 8500,
-          temperature: 0.72,
-          top_p: 0.9,
-          repetition_penalty: 1.08
-        });
-        let raw = String(result && result.response || "").trim();
-        raw = raw.replace(/^\x60\x60\x60(?:json)?\s*/i, "").replace(/\s*\x60\x60\x60$/, "");
-        const first = raw.indexOf("{"), last = raw.lastIndexOf("}");
-        if (first >= 0 && last > first) raw = raw.slice(first, last + 1);
-        const parsed = JSON.parse(raw);
+        const model = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+        const systemMessage = "Sos una escritora y editora literaria de primer nivel, especializada en convertir relatos orales en libros breves y publicables en español rioplatense. Tu prioridad es la fidelidad, la calidad narrativa, un prólogo específico y capítulos con progresión. Nunca inventes hechos. Respondé únicamente JSON válido.";
         const textValue = (value) => {
           if (typeof value === "string") return value.trim();
           if (typeof value === "number") return String(value);
@@ -100,17 +87,63 @@ export default {
           }
           return "";
         };
-        const title = textValue(parsed.title);
-        const subtitle = textValue(parsed.subtitle);
-        const summary = textValue(parsed.summary);
-        const prologue = textValue(parsed.prologue);
-        if (!title || !summary || !prologue || !Array.isArray(parsed.chapters) || !parsed.chapters.length) throw new Error("Invalid book structure");
-        const chapters = parsed.chapters.slice(0, 8).map((ch) => ({
-          title: textValue(ch && ch.title) || "Capítulo",
-          text: textValue(ch && (ch.text ?? ch.content ?? ch.body))
-        })).filter(ch => ch.text && ch.text !== "[object Object]");
-        if (!chapters.length) throw new Error("No valid chapters returned");
-        return Response.json({ title: title.slice(0, 180), subtitle: subtitle.slice(0, 240), summary, prologue, chapters, model: "@cf/meta/llama-3.3-70b-instruct-fp8-fast" }, { headers: cors });
+        const parseBook = (output) => {
+          let raw = String(output || "").trim();
+          raw = raw.replace(/^\x60\x60\x60(?:json)?\s*/i, "").replace(/\s*\x60\x60\x60$/, "");
+          const first = raw.indexOf("{"), last = raw.lastIndexOf("}");
+          if (first < 0 || last <= first) throw new Error("La IA no devolvió un objeto JSON completo.");
+          const parsed = JSON.parse(raw.slice(first, last + 1));
+          const title = textValue(parsed.title);
+          const subtitle = textValue(parsed.subtitle);
+          const summary = textValue(parsed.summary);
+          const prologue = textValue(parsed.prologue);
+          const chapters = Array.isArray(parsed.chapters) ? parsed.chapters.slice(0, 8).map((ch) => ({
+            title: textValue(ch && ch.title) || "Capítulo",
+            text: textValue(ch && (ch.text ?? ch.content ?? ch.body))
+          })).filter(ch => ch.text && ch.text !== "[object Object]") : [];
+          if (!title || !summary || !prologue || !chapters.length) {
+            throw new Error("La respuesta llegó incompleta: faltan título, sinopsis, prólogo o capítulos.");
+          }
+          if (chapters.some(ch => ch.text.length < 120)) {
+            throw new Error("Uno de los capítulos quedó demasiado corto.");
+          }
+          return { title: title.slice(0, 180), subtitle: subtitle.slice(0, 240), summary, prologue, chapters };
+        };
+        const runEditor = async (messages, maxTokens) => {
+          const result = await env.AI.run(model, {
+            messages,
+            max_tokens: maxTokens,
+            temperature: 0.55,
+            top_p: 0.9,
+            repetition_penalty: 1.08
+          });
+          return String(result && result.response || "").trim();
+        };
+        let book;
+        let firstError = "";
+        try {
+          const output = await runEditor([
+            { role: "system", content: systemMessage },
+            { role: "user", content: prompt }
+          ], 8500);
+          book = parseBook(output);
+        } catch (error) {
+          firstError = String(error && error.message || error).slice(0, 300);
+          const repairPrompt = [
+            "La respuesta anterior no pudo utilizarse como libro completo. Volvé a trabajar desde la transcripción original y entregá el libro entero, no una explicación ni un resumen.",
+            "Devolvé exclusivamente un JSON válido, sin Markdown, con estas claves exactas: title (string), subtitle (string), summary (string), prologue (string), chapters (array de 2 a 6 objetos con title y text como strings).",
+            "Cada capítulo debe contener prosa desarrollada y superar los 120 caracteres. No dejes campos vacíos, no uses marcadores, no cortes el texto y no inventes hechos.",
+            "Error detectado en el primer intento: " + firstError,
+            "INSTRUCCIONES EDITORIALES Y TRANSCRIPCIÓN ORIGINAL:",
+            prompt
+          ].join("\n\n");
+          const repaired = await runEditor([
+            { role: "system", content: systemMessage + " Si recibís una solicitud de reparación, reconstruí el objeto completo y validá mentalmente que sea JSON correcto y que todos los campos estén completos." },
+            { role: "user", content: repairPrompt }
+          ], 8500);
+          book = parseBook(repaired);
+        }
+        return Response.json({ ...book, model, repaired: Boolean(firstError) }, { headers: cors });
       } catch (error) {
         return Response.json({ error: "No se pudo editar el libro con IA. Probá otra vez; tu grabación original sigue guardada." }, { status: 502, headers: cors });
       }
