@@ -456,3 +456,10 @@ footer{color:#9dbce3}
 .book-cover-logo,.book-cover-title,.book-cover-meta{position:relative;z-index:3}
 #home .hero-icon{filter:drop-shadow(0 14px 25px #0008) drop-shadow(0 0 12px #28bfff33)}
 @media(max-height:720px){#home{gap:10px;padding:6px 4px}#home .hero-icon{width:min(34vw,135px);max-height:18vh}#home h1{font-size:clamp(30px,7vw,39px);margin:0 0 4px}#home .big-button{min-height:66px}}
+
+
+/* LIVRA 3.9.1 — make the manuscript text area clearly scrollable */
+#reader .reader-page{overflow:hidden}
+#reader .book-page-frame{min-height:0}
+#reader .reader-page p{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#c3a35e transparent;padding-right:3px}
+#reader .reader-page p:focus{outline:2px solid #c3a35e;outline-offset:2px}
