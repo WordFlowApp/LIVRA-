@@ -59,6 +59,7 @@ public class MainActivity extends Activity {
         livraTts = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS && livraTts != null) {
                 int language = livraTts.setLanguage(new Locale("es", "AR"));
+                if (language == TextToSpeech.LANG_MISSING_DATA || language == TextToSpeech.LANG_NOT_SUPPORTED) language = livraTts.setLanguage(new Locale("es", "ES"));
                 livraTtsReady = language != TextToSpeech.LANG_MISSING_DATA && language != TextToSpeech.LANG_NOT_SUPPORTED;
                 livraTts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override public void onStart(String id) {}
