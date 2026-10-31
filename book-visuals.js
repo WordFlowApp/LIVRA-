@@ -369,7 +369,7 @@
           const title = makeElement("h2", "", category);
           const count = makeElement("span", "book-collection-count", String(groupBooks.length).padStart(2, "0") + " LIBRO" + (groupBooks.length === 1 ? "" : "S"));
           heading.append(title, count);
-          const rail = makeElement("div", "book-rail");
+          const rail = makeElement("div", "book-shelf-grid");
           groupBooks.forEach(function (book) { rail.append(makeCoverCard(book)); });
           section.append(heading, rail);
           root.append(section);
