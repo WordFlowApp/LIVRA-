@@ -6,6 +6,9 @@
   const creditByUrl = Object.create(null);
   const PHOTO_CACHE = "livra-photographic-covers-v1";
   const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
+  const LIVRA_EDITOR_API = "https://livra-transcription.talitaescuela.workers.dev";
+  const COVER_VERSION = 46;
+  const usedPhotoUrls = new Set();
   const GENERIC_TERMS = new Set(["mi historia", "mi libro", "historia personal", "sin título", "untitled"]);
 
   function cleanText(value) {
@@ -93,8 +96,67 @@
       };
     } catch (_) { return null; }
   }
-  async function commonsPhoto(query) {
-    const searches = [query, "book reading lifestyle photography"];
+  function bookContent(book) {
+    const pages = Array.isArray(book.pages) ? book.pages : [];
+    const chapters = pages.filter(page => page && (page.section === "chapter" || page.body))
+      .slice(0, 10).map(page => [page.heading, page.body].filter(Boolean).join("\n")).join("\n\n");
+    return [book.subtitle, book.summary, book.prologue, chapters, book.transcript]
+      .filter(Boolean).join("\n\n").slice(0, 9000);
+  }
+  function coverArtDirection(book, source) {
+    return [
+      "Create an original, premium editorial BOOK COVER IMAGE for the following book.",
+      "FORMAT: vertical portrait 2:3 composition, full bleed edge-to-edge artwork.",
+      "STYLE: vivid full-color photorealistic cinematic editorial photography, rich natural color, professional publishing quality, beautiful light, visual depth.",
+      "SUBJECT: depict the actual themes, people, setting, emotions and subject matter in the book content below. Make this cover distinctive to this exact book, not generic stock art.",
+      "COMPOSITION: one strong central visual subject, refined visual storytelling, enough darker or calmer negative space near the lower third for title typography to be overlaid by the app.",
+      "DO NOT create geometric rectangles, abstract gradients, book mockups, bookshelves, logos, watermarks, text, lettering, typography, icons or graphic placeholders. The image itself must be the dominant visual.",
+      "BOOK TITLE: " + cleanText(book.title),
+      "BOOK CONTENT AND CONTEXT: " + String(source || "").slice(0, 9000)
+    ].join("\n\n");
+  }
+  async function aiGeneratedCover(book, source) {
+    const response = await fetch(LIVRA_EDITOR_API + "/cover", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: cleanText(book.title || "Mi historia"),
+        text: coverArtDirection(book, source),
+        aspectRatio: "2:3",
+        style: "photorealistic full-color premium editorial book cover",
+        livraVersion: "4.6"
+      })
+    });
+    if (!response.ok) {
+      let detail = "";
+      try { const data = await response.json(); detail = data.error || ""; } catch (_) {}
+      throw new Error(detail || "El servicio de portadas respondió " + response.status);
+    }
+    const blob = await response.blob();
+    if (!blob.size || !/^image\//i.test(blob.type || "") || blob.size < 1024) {
+      throw new Error("El servicio no devolvió una imagen de portada válida.");
+    }
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    return {
+      url: dataUrl,
+      attribution: "Portada original generada por LIVRA",
+      sourceUrl: "",
+      license: "Imagen creada para este libro"
+    };
+  }
+  async function commonsPhoto(query, title) {
+    const titlePhrase = cleanText(title || "");
+    const searches = [
+      [titlePhrase, query].filter(Boolean).join(" "),
+      [query, titlePhrase].filter(Boolean).join(" "),
+      query,
+      "book reading lifestyle photography"
+    ];
     for (const phrase of searches) {
       try {
         const params = new URLSearchParams({
@@ -110,7 +172,7 @@
         const pages = Object.values((data.query && data.query.pages) || {});
         const candidates = pages.map(page => {
           const info = page.imageinfo && page.imageinfo[0];
-          if (!info || !info.thumburl || failedPhotoUrls.has(info.thumburl) || !/^image\/(jpeg|png|webp)$/i.test(info.mime || "")) return null;
+          if (!info || !info.thumburl || failedPhotoUrls.has(info.thumburl) || usedPhotoUrls.has(info.thumburl) || !/^image\/(jpeg|png|webp)$/i.test(info.mime || "")) return null;
           const width = Number(info.width || 0), height = Number(info.height || 0);
           const ratio = height ? width / height : 0;
           const fileName = normalize(page.title);
@@ -126,22 +188,30 @@
               (/\b(photo|photograph|photography|photographie|fotografia)\b/.test(fileName) ? 500000 : 0)
           };
         }).filter(Boolean).sort((a, b) => b.score - a.score);
-        if (candidates.length) return candidates[0];
+        if (candidates.length) {
+          usedPhotoUrls.add(candidates[0].url);
+          return candidates[0];
+        }
       } catch (_) { /* try the next search phrase */ }
     }
     return null;
   }
-  async function photographicCover(title, source) {
+  async function photographicCover(title, source, fullBook) {
+    const book = fullBook || { title: title, summary: source };
     const editorial = await exactGoogleBook(title) || await exactOpenLibraryBook(title);
     if (editorial) return editorial;
-    const book = { title: title, summary: source };
-    const photo = await commonsPhoto(photoQuery(book));
+    try {
+      return await aiGeneratedCover(book, source);
+    } catch (error) {
+      console.warn("LIVRA: la portada IA no respondió; se buscará una fotografía editorial.", error);
+    }
+    const photo = await commonsPhoto(photoQuery(book), title);
     if (photo) return photo;
-    throw new Error("No encontramos una fotografía editorial adecuada para esta historia.");
+    throw new Error("No encontramos una imagen adecuada para esta historia. El libro permanece guardado.");
   }
   window.__livraCoverCredits = creditByUrl;
   window.generateAICover = async function (title, source) {
-    const result = await photographicCover(title, source);
+    const result = await photographicCover(title, source, { title: title, summary: source });
     creditByUrl[result.url] = result;
     return result.url;
   };
@@ -168,6 +238,7 @@
     image.addEventListener("error", function () {
       failedPhotoUrls.add(book.coverImage);
       book.coverImage = null;
+      book.coverVersion = 0;
       book.coverAttribution = null;
       book.coverSourceUrl = null;
       book.coverLicense = null;
@@ -199,13 +270,15 @@
     if (pending.has(book.id)) return;
     pending.add(book.id);
     try {
-      const url = await window.generateAICover(book.title, [book.subtitle, book.summary,
-        book.prologue, book.transcript].filter(Boolean).join("\n\n"));
+      const result = await photographicCover(book.title, bookContent(book), book);
+      const url = result.url;
+      creditByUrl[url] = result;
       book.coverImage = url;
+      book.coverVersion = COVER_VERSION;
       const credit = creditByUrl[url];
       if (credit) {
         book.coverAttribution = credit.attribution;
-        book.coverSourceUrl = credit.sourceUrl;
+        book.coverSourceUrl = credit.sourceUrl || "";
         book.coverLicense = credit.license;
       }
       await window.putItem("books", book);
@@ -248,13 +321,15 @@
       const needsCover = [];
       const usable = [];
       window.books.forEach(function (book) {
-        const oldGeneratedImage = /^data:image\//i.test(book.coverImage || "");
         const validRemoteImage = /^https:\/\//i.test(book.coverImage || "");
-        if (oldGeneratedImage || (book.coverImage && !validRemoteImage)) {
+        const validGeneratedImage = /^data:image\/(png|jpeg|webp);base64,/i.test(book.coverImage || "");
+        const supportedImage = validRemoteImage || validGeneratedImage;
+        if (book.coverVersion !== COVER_VERSION || (book.coverImage && !supportedImage)) {
           book.coverImage = null;
           book.coverAttribution = null;
           book.coverSourceUrl = null;
           book.coverLicense = null;
+          book.coverVersion = 0;
           window.putItem("books", book).catch(function () {});
         }
         if (!book.coverImage) needsCover.push(book);
