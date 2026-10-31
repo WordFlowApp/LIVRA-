@@ -345,12 +345,14 @@
       const empty = document.getElementById("emptyLibrary");
       if (!root || !empty) return;
       root.replaceChildren();
-      const needsCover = [];\n      const seenCoverImages = new Set();
+      const needsCover = [];
+      const seenCoverImages = new Set();
       const usable = [];
       window.books.forEach(function (book) {
         const validRemoteImage = /^https:\/\//i.test(book.coverImage || "");
         const validGeneratedImage = /^data:image\/(png|jpeg|webp);base64,/i.test(book.coverImage || "");
-        const supportedImage = validRemoteImage || validGeneratedImage;\n        const duplicateCover = supportedImage && seenCoverImages.has(book.coverImage);\n        if (supportedImage && !duplicateCover) seenCoverImages.add(book.coverImage);
+        const supportedImage = validRemoteImage || validGeneratedImage;
+        const duplicateCover = supportedImage && seenCoverImages.has(book.coverImage);\n        if (supportedImage && !duplicateCover) seenCoverImages.add(book.coverImage);
         if (book.coverVersion !== COVER_VERSION || (book.coverImage && !supportedImage) || duplicateCover) {
           book.coverImage = null;
           book.coverAttribution = null;
