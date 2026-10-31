@@ -91,7 +91,7 @@ $("buildBook").addEventListener("click",async function(){
   transcript=parts.join("\n\n");if(transcript.length<80)throw new Error("La historia necesita más texto para crear un libro. El audio permanece guardado.");
   button.textContent="✍️ LA IA ESTÁ ESCRIBIENDO…";
   const composed=await composeBook(transcript,title);
-  const book={type:"book",title:composed.title,subtitle:composed.subtitle||"",createdAt:new Date().toISOString(),audioIds:chosen.map(function(item){return item.id;}),transcript:transcript,summary:composed.summary,prologue:composed.prologue,pages:composed.pages,coverImage:null,coverTone:Math.floor(Math.random()*5),localDraft:false};
+  const book={type:"book",title:composed.title,subtitle:composed.subtitle||"",createdAt:new Date().toISOString(),audioIds:chosen.map(function(item){return item.id;}),transcript:transcript,summary:composed.summary,prologue:composed.prologue,pages:composed.pages,coverImage:null,coverVersion:46,coverTone:Math.floor(Math.random()*5),localDraft:false};
   book.id=await addItem("books",book);selectedAudioIds.clear();show("library");renderLibrary();toast("¡Libro creado con edición literaria! Generando una tapa con IA…");
   try{const coverBrief=[book.subtitle,book.summary,book.prologue,composed.pages.filter(function(page){return page.section==="chapter";}).slice(0,3).map(function(page){return page.body;}).join("\n\n")].filter(Boolean).join("\n\n");const imageData=await generateAICover(book.title,coverBrief);book.coverImage=imageData;await putItem("books",book);renderLibrary();if(activeBook&&activeBook.id===book.id){const cover=$("coverPreview");cover.style.backgroundImage="linear-gradient(180deg,rgba(5,18,40,.12),rgba(5,18,40,.72)),url("+JSON.stringify(imageData)+")";cover.style.backgroundSize="cover";cover.style.backgroundPosition="center";}}catch(coverError){toast("El libro ya está guardado. La tapa con IA no se pudo generar esta vez.");}
  }catch(e){toast((e&&e.message?e.message:"No se pudo editar el libro.")+" Tu grabación sigue guardada.");}
@@ -175,7 +175,7 @@ $("stopAudiobook").addEventListener("click",function(){stopAudiobook(true);});
 
 window.addEventListener("pagehide",function(){stopTimer();stopRecognition();releaseStream();stopPreview();});
 
-/* LIVRA 4.5 — recover covers for books created before AI cover generation */
+/* LIVRA 4.6 — versioned photographic and AI-generated covers */
 const renderLibraryWithoutCoverRecovery=renderLibrary;
 let livraCoverRecoveryRunning=false;
 async function recoverMissingBookCovers(){
