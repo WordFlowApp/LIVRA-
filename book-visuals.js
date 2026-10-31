@@ -253,7 +253,7 @@
         new Date(book.createdAt || Date.now()).toLocaleDateString("es-AR")));
     cover.append(image, shade, title, meta);
     button.append(cover);
-    button.addEventListener("click", function () { window.openBook(book); });
+    button.addEventListener("click", function () { window.openBookCoverPreview(book); });
     shell.append(button);
     if (book.coverAttribution && book.coverSourceUrl) {
       const credit = document.createElement("a");
@@ -310,6 +310,32 @@
     host.prepend(image);
     host.append(credit);
   }
+  window.openBookCoverPreview = function (book) {
+    let modal = document.getElementById("livraCoverModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "livraCoverModal";
+      modal.className = "livra-cover-modal";
+      modal.setAttribute("role", "dialog");
+      modal.setAttribute("aria-modal", "true");
+      modal.setAttribute("aria-label", "Vista ampliada de la portada");
+      modal.innerHTML = '<button type="button" class="livra-cover-close" aria-label="Cerrar portada">×</button><div class="livra-cover-preview"><img class="livra-cover-preview-image" alt=""><div class="livra-cover-preview-caption"><h2></h2><p>LIVRA ORIGINAL</p></div></div><button type="button" class="livra-cover-read">LEER LIBRO</button>';
+      document.body.append(modal);
+      modal.querySelector(".livra-cover-close").addEventListener("click", function () { modal.classList.remove("is-open"); });
+      modal.addEventListener("click", function (event) { if (event.target === modal) modal.classList.remove("is-open"); });
+      modal.querySelector(".livra-cover-read").addEventListener("click", function () {
+        const selected = modal._livraBook;
+        modal.classList.remove("is-open");
+        if (selected && typeof window.openBook === "function") window.openBook(selected);
+      });
+    }
+    modal._livraBook = book;
+    const image = modal.querySelector(".livra-cover-preview-image");
+    image.src = book.coverImage || "";
+    image.alt = "Portada completa de " + (book.title || "Mi historia");
+    modal.querySelector(".livra-cover-preview-caption h2").textContent = book.title || "Mi historia";
+    modal.classList.add("is-open");
+  };
   window.renderLibrary = function () {
     window.getAll("books").then(function (items) {
       window.books = items.sort(function (a, b) {
@@ -320,12 +346,15 @@
       if (!root || !empty) return;
       root.replaceChildren();
       const needsCover = [];
+      const seenCoverImages = new Set();
       const usable = [];
       window.books.forEach(function (book) {
         const validRemoteImage = /^https:\/\//i.test(book.coverImage || "");
         const validGeneratedImage = /^data:image\/(png|jpeg|webp);base64,/i.test(book.coverImage || "");
         const supportedImage = validRemoteImage || validGeneratedImage;
-        if (book.coverVersion !== COVER_VERSION || (book.coverImage && !supportedImage)) {
+        const duplicateCover = supportedImage && seenCoverImages.has(book.coverImage);
+        if (supportedImage && !duplicateCover) seenCoverImages.add(book.coverImage);
+        if (book.coverVersion !== COVER_VERSION || (book.coverImage && !supportedImage) || duplicateCover) {
           book.coverImage = null;
           book.coverAttribution = null;
           book.coverSourceUrl = null;
@@ -369,7 +398,7 @@
           const title = makeElement("h2", "", category);
           const count = makeElement("span", "book-collection-count", String(groupBooks.length).padStart(2, "0") + " LIBRO" + (groupBooks.length === 1 ? "" : "S"));
           heading.append(title, count);
-          const rail = makeElement("div", "book-rail");
+          const rail = makeElement("div", "book-shelf-grid");
           groupBooks.forEach(function (book) { rail.append(makeCoverCard(book)); });
           section.append(heading, rail);
           root.append(section);

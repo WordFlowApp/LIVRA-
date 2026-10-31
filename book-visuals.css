@@ -286,3 +286,39 @@
   #library .book-card,#library .book-cover-photo{transition:none}
   #library .cover-preparing-pulse{animation:none}
 }
+/* LIVRA mobile upgrade: three-column bookshelf and nine-line live transcript */
+#library.screen.active{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#library .book-grid{display:flex;flex-direction:column;gap:20px}
+#library .book-rail.book-shelf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:2px 0 10px;overflow:visible}
+#library .book-card-shell{width:100%;min-width:0;flex:initial;scroll-snap-align:unset}
+#library .book-cover{aspect-ratio:2/3;border-radius:10px}
+#library .book-cover-title{left:7px;right:7px;bottom:26px;font-size:clamp(12px,3.5vw,16px)!important;max-height:4.2em}
+#library .book-cover-meta{left:7px;right:7px;bottom:8px;font-size:7px!important;letter-spacing:.5px}
+#library .book-credit{font-size:8px}
+#recording .transcript-edit{flex:0 0 auto;height:clamp(230px,34dvh,310px);min-height:230px;max-height:38dvh;line-height:1.42;overflow-y:auto;scroll-behavior:smooth}
+#recording .mic-visual{width:min(24vw,88px);height:min(24vw,88px)}
+#recording .mic-glyph{font-size:clamp(38px,9vw,50px)}
+#recording .waveform{height:19px;flex-basis:19px}
+#recording .record-controls{margin-top:0}
+#recording .control-button{min-height:58px}
+@media(max-height:760px){
+ #recording .transcript-edit{height:30dvh;min-height:205px;max-height:33dvh}
+ #recording .mic-visual{width:70px;height:70px}
+ #recording .mic-glyph{font-size:38px}
+ #recording .waveform{height:16px;flex-basis:16px}
+}
+@media(max-width:350px){
+ #library .book-rail.book-shelf-grid{gap:8px}
+ #library .book-cover-title{font-size:11px!important}
+}
+
+/* LIVRA full-screen cover preview */
+.livra-cover-modal{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:calc(18px + env(safe-area-inset-top)) 22px calc(18px + env(safe-area-inset-bottom));background:rgba(3,10,22,.97);overflow:auto}
+.livra-cover-modal.is-open{display:flex}
+.livra-cover-close{position:absolute;top:calc(12px + env(safe-area-inset-top));right:16px;width:46px;height:46px;border:1px solid #e9c76a;border-radius:50%;background:#10294d;color:#f8e5b2;font-size:32px;line-height:1}
+.livra-cover-preview{position:relative;width:min(82vw,440px);max-height:72dvh;aspect-ratio:2/3;overflow:hidden;border:1px solid #d9bd7d;border-radius:14px;box-shadow:0 18px 48px #0009;background:#14263a}
+.livra-cover-preview-image{width:100%;height:100%;object-fit:contain;display:block}
+.livra-cover-preview-caption{position:absolute;inset:auto 0 0;padding:44px 18px 18px;background:linear-gradient(transparent,rgba(3,10,20,.92));color:#fff}
+.livra-cover-preview-caption h2{margin:0;font:700 clamp(23px,6vw,34px)/1.1 Georgia,serif}
+.livra-cover-preview-caption p{margin:8px 0 0;color:#f0d28d;font-size:11px;letter-spacing:2px;font-weight:800}
+.livra-cover-read{width:min(82vw,440px);min-height:60px;border:1px solid #ffe9a4;border-radius:16px;background:linear-gradient(135deg,#f4d778,#c79a3c);color:#10213b;font-size:21px;font-weight:900}
