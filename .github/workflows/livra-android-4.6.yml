@@ -1,6 +1,16 @@
 name: LIVRA Android 4.6
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "android/**"
+      - "app.js"
+      - "index.html"
+      - "book-visuals.js"
+      - "book-visuals.css"
+      - "sw.js"
+      - ".github/workflows/livra-android-4.6.yml"
   push:
     branches: [main]
     paths:
