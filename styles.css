@@ -655,3 +655,65 @@ footer{color:#8fa7b8}
 .book-preview-screen .big-button{width:100%;max-width:420px;flex:0 0 auto}
 .book-preview-screen .preview-back{align-self:flex-start;flex:0 0 auto}
 @media(min-width:700px){#library .book-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:900px;align-self:center}.book-preview-artwork{max-height:48dvh}}
+
+
+/* LIVRA 4.8 — harden mobile library layout against legacy shelf rules */
+#library.screen.active{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  gap:10px!important;
+}
+#library .library-brand-heading,
+#library .amazon-button,
+#library #libraryRecord,
+#library #libraryHome{flex:0 0 auto!important}
+#library .book-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  grid-auto-rows:max-content!important;
+  align-items:start!important;
+  align-content:start!important;
+  justify-items:stretch!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-height:none!important;
+  flex:1 1 0!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  gap:12px 9px!important;
+  padding:8px 2px 18px!important;
+  margin:0!important;
+  background:repeating-linear-gradient(180deg,transparent 0,transparent 236px,rgba(184,133,82,.34) 237px,rgba(232,190,133,.55) 242px,rgba(91,51,29,.8) 248px,transparent 255px)!important;
+  box-sizing:border-box!important;
+}
+#library .book-grid>.book-card{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  align-self:start!important;
+  box-sizing:border-box!important;
+}
+#library .book-grid>.book-card .book-cover{
+  display:flex!important;
+  width:100%!important;
+  aspect-ratio:2/3!important;
+  height:auto!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+}
+#library .book-grid>.book-card-placeholder{pointer-events:auto!important}
+#library .empty-state{display:none!important}
+@media(min-width:700px){
+  #library .book-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:900px!important;align-self:center!important}
+}
