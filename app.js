@@ -1,5 +1,5 @@
 const $ = function(id){ return document.getElementById(id); };
-const screens = ["home","recording","audioFiles","library","reader"];
+const screens = ["home","recording","audioFiles","library","bookPreview","reader"];
 let recorder=null, stream=null, chunks=[], tickHandle=null, seconds=0, currentBlob=null, savingRecording=false, recognition=null, recognitionWanted=false, finalTranscript="", recordings=[], books=[], selectedAudioIds=new Set(), activeBook=null, bookPages=[], pageIndex=0, audioUrl=null, previewAudio=null;
 function show(id){ screens.forEach(function(s){ $(s).classList.toggle("active",s===id); }); document.body.classList.toggle("reader-open",id==="reader"); if(id==="audioFiles") renderRecordings(); if(id==="library") renderLibrary(); window.scrollTo(0,0); }
 function toast(message){ const el=$("toast"); el.textContent=message; el.classList.add("show"); window.clearTimeout(toast.timer); toast.timer=window.setTimeout(function(){el.classList.remove("show");},3200); }
@@ -75,7 +75,7 @@ function updateSelection(){const n=selectedAudioIds.size;$("selectionStatus").te
 function makeBookPages(text,title){const clean=(text||"").replace(/\s+/g," ").trim();if(!clean)return [{heading:title,body:"Esta grabación todavía no tiene texto transcripto. Para crear un libro con su contenido, usá Chrome con el reconocimiento de voz habilitado y volvé a grabar tu historia."}];const sentences=clean.split(/(?<=[.!?])\s+/);const pages=[];let buffer="";sentences.forEach(function(sentence){if((buffer+" "+sentence).trim().length>620&&buffer){pages.push(buffer.trim());buffer=sentence;}else buffer=(buffer+" "+sentence).trim();});if(buffer)pages.push(buffer);return pages.map(function(body,index){return {heading:index===0?"Mi historia":"Capítulo "+(index+1),body:body};});}
 function coverClass(index){return "cover-tone-"+(index%5+1);}
 const LIVRA_EDITOR_API="https://livra-transcription.talitaescuela.workers.dev";
-$("publishAmazon").addEventListener("click",function(){window.location.assign("https://www.amazon.com/books");});
+$("publishAmazon").addEventListener("click",function(){window.location.assign("https://www.amazon.com/books-used-books-textbooks/b?node=283155");});
 function splitIntoBookPages(text,heading){const clean=String(text||"").replace(/\s+/g," ").trim();if(!clean)return [];const sentences=clean.split(/(?<=[.!?])\s+/);const pages=[];let buffer="";sentences.forEach(function(sentence){if((buffer+" "+sentence).trim().length>620&&buffer){pages.push(buffer.trim());buffer=sentence;}else buffer=(buffer+" "+sentence).trim();});if(buffer)pages.push(buffer);return pages.map(function(body,index){return {heading:index===0?heading:heading+" (continuación)",body:body};});}
 async function generateAICover(title,source){let lastError;for(let attempt=0;attempt<2;attempt++){try{const response=await fetch(LIVRA_EDITOR_API+"/cover",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:title,text:String(source||"").slice(0,1800)})});if(!response.ok){let detail="";try{const data=await response.json();detail=data.error||"";}catch(e){}throw new Error(detail||"El servicio de tapas respondió "+response.status+".");}const blob=await response.blob();if(!blob.size||!String(blob.type||"").includes("image"))throw new Error("La IA no devolvió una imagen válida.");return await new Promise(function(resolve,reject){const reader=new FileReader();reader.onload=function(){resolve(String(reader.result));};reader.onerror=reject;reader.readAsDataURL(blob);});}catch(error){lastError=error;if(attempt===0)await new Promise(function(resolve){setTimeout(resolve,900);});}}throw lastError||new Error("No se pudo generar la tapa.");}
 async function transcribeSavedAudio(item){if(!item||!item.blob)throw new Error("No se encontró el audio guardado.");if(item.blob.size>20*1024*1024)throw new Error("El audio supera los 20 MB. Dividí la historia en grabaciones más cortas.");const form=new FormData();const originalName=String(item.fileName||"").trim();const nameExt=(originalName.match(/\.([a-z0-9]{2,5})$/i)||[])[1];const mimeExt={"audio/wav":"wav","audio/x-wav":"wav","audio/mpeg":"mp3","audio/mp3":"mp3","audio/mp4":"m4a","audio/x-m4a":"m4a","audio/aac":"aac","audio/ogg":"ogg","audio/opus":"opus","audio/webm":"webm"};const ext=(nameExt||mimeExt[item.blob.type]||((item.blob.type||"").includes("wav")?"wav":"webm")).toLowerCase();form.append("audio",item.blob,"livra-recording."+ext);const response=await fetch(LIVRA_EDITOR_API+"/transcribe",{method:"POST",body:form});let data={};try{data=await response.json();}catch(e){}if(!response.ok)throw new Error(data.error||"No se pudo transcribir una de las grabaciones.");const transcript=String(data.text||"").trim();if(!transcript)throw new Error("La transcripción llegó vacía. Tu audio sigue guardado.");item.transcript=transcript;await putItem("recordings",item);return transcript;}
@@ -113,36 +113,21 @@ function renderLibrary(){
   books=items.sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt);});
   const root=$("bookGrid");
   root.replaceChildren();
-  $("emptyLibrary").classList.add("hidden");
   root.classList.remove("hidden");
+  $("emptyLibrary").classList.add("hidden");
   $("librarySubtitle").textContent=books.length?books.length+" libro"+(books.length===1?"":"s")+" creado"+(books.length===1?"":"s"):"Tu biblioteca está esperando tus historias.";
-  if(!books.length){
-   for(let index=0;index<4;index++){
-    const placeholder=document.createElement("div");
-    placeholder.className="book-card book-card-placeholder";
-    placeholder.setAttribute("aria-label","Espacio para tu próximo libro");
-    const cover=document.createElement("div");
-    cover.className="book-cover empty-book-cover";
-    const spine=document.createElement("span"); spine.className="empty-book-spine";
-    const label=document.createElement("strong"); label.className="book-cover-title"; label.textContent="AQUÍ TU LIBRO";
-    const icon=document.createElement("span"); icon.className="empty-book-icon"; icon.textContent="✦";
-    cover.append(spine,icon,label);
-    placeholder.append(cover);
-    root.append(placeholder);
-   }
-   return;
-  }
   books.forEach(function(book,index){
    const button=document.createElement("button");
+   button.type="button";
    button.className="book-card";
-   button.setAttribute("aria-label","Abrir libro "+(book.title||"Mi historia"));
+   button.setAttribute("aria-label","Ver portada de "+(book.title||"Mi historia"));
    const cover=document.createElement("div");
    cover.className="book-cover "+coverClass(Number.isInteger(book.coverTone)?book.coverTone:index);
    if(book.coverImage){
     const poster=document.createElement("img");
     poster.className="book-cover-photo";
     poster.src=book.coverImage;
-    poster.alt="Imagen de tapa de "+(book.title||"Mi historia");
+    poster.alt="Portada de "+(book.title||"Mi historia");
     cover.append(poster);
    }
    const shade=document.createElement("div"); shade.className="book-cover-shade";
@@ -158,11 +143,37 @@ function renderLibrary(){
     cover.append(placeholder);
    }
    button.append(cover);
-   button.addEventListener("click",function(){openBook(book);});
+   button.addEventListener("click",function(){previewBook(book);});
    root.append(button);
   });
- }).catch(function(){toast("No se pudo abrir la biblioteca.");});
+  for(let index=books.length;index<9;index++){
+   const placeholder=document.createElement("button");
+   placeholder.type="button";
+   placeholder.className="book-card book-card-placeholder";
+   placeholder.setAttribute("aria-label","Crear tu próximo libro");
+   const cover=document.createElement("div");
+   cover.className="book-cover empty-book-cover";
+   const spine=document.createElement("span");spine.className="empty-book-spine";
+   const icon=document.createElement("span");icon.className="empty-book-icon";icon.textContent="✦";
+   const label=document.createElement("strong");label.className="book-cover-title";label.textContent="TU PRÓXIMO LIBRO AQUÍ";
+   cover.append(spine,icon,label);
+   placeholder.append(cover);
+   placeholder.addEventListener("click",requestMicThenRecord);
+   root.append(placeholder);
+  }
+ }).catch(function(){toast("No se pudo cargar la biblioteca.");});
 }
+function previewBook(book){
+ activeBook=book;
+ const cover=$("bookPreviewArtwork");
+ cover.style.backgroundImage=book.coverImage?"linear-gradient(180deg,rgba(5,18,40,.08),rgba(5,18,40,.68)),url("+JSON.stringify(book.coverImage)+")":"linear-gradient(145deg,#284766,#0a1a30)";
+ $("bookPreviewTitle").textContent=book.title||"Mi historia";
+ $("bookPreviewAuthor").textContent=book.author||"Autor: "+(book.authorName||"Tu historia");
+ $("bookPreviewDate").textContent="Creado el "+dateText(book.createdAt);
+ show("bookPreview");
+}
+$("previewReadBook").addEventListener("click",function(){if(activeBook)openBook(activeBook);});
+$("previewBack").addEventListener("click",function(){show("library");});
 function openBook(book){stopAudiobook(false);activeBook=book;bookPages=Array.isArray(book.pages)&&book.pages.length?book.pages:makeBookPages(book.transcript,book.title);pageIndex=0;$("readerTitle").textContent=book.title||"Mi historia";const cover=$("coverPreview");cover.className="reader-cover "+coverClass(book.coverTone||0);cover.style.backgroundImage=book.coverImage?"linear-gradient(180deg,rgba(5,18,40,.12),rgba(5,18,40,.72)),url("+JSON.stringify(book.coverImage)+")":"";cover.style.backgroundSize=book.coverImage?"cover":"";cover.style.backgroundPosition=book.coverImage?"center":"";renderPage();$("retryCover").classList.toggle("hidden",Boolean(book.coverImage));show("reader");}
 function renderPage(){const page=bookPages[pageIndex]||bookPages[0]||{heading:"Mi historia",body:""};$("pageHeading").textContent=page.heading;$("pageText").textContent=page.body;let label="TU HISTORIA";if(page.section==="summary"||/^resumen$/i.test(page.heading||""))label="RESUMEN";else if(page.section==="prologue"||/^prólogo$/i.test(page.heading||""))label="PRÓLOGO";else if(page.section==="chapter"){let chapterNumber=0;for(let i=0;i<=pageIndex;i++){const item=bookPages[i];if(item&&item.section==="chapter"&&!/\(continuación\)$/i.test(item.heading||""))chapterNumber++;}label="CAPÍTULO "+Math.max(1,chapterNumber);}else if(pageIndex>0)label="CONTENIDO";$("pageLabel").textContent=label;$("bookRunningTitle").textContent=activeBook.title||"Mi historia";$("pageFooterTitle").textContent=activeBook.title||"Mi historia";$("pageNumber").textContent=String(pageIndex+1);const image=$("pageImage");if(page.image){image.src=page.image;image.classList.remove("hidden");}else{image.removeAttribute("src");image.classList.add("hidden");}$("pageCount").textContent=(pageIndex+1)+" / "+bookPages.length;$("prevPage").disabled=pageIndex===0;$("nextPage").disabled=pageIndex>=bookPages.length-1;}
 $("readerBack").addEventListener("click",function(){stopAudiobook(false);show("library");});
