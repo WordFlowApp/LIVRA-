@@ -2,6 +2,7 @@
 (function () {
   "use strict";
   const pending = new Set();
+  const failedPhotoUrls = new Set();
   const creditByUrl = Object.create(null);
   const PHOTO_CACHE = "livra-photographic-covers-v1";
   const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
@@ -62,6 +63,7 @@
         match.volumeInfo.imageLinks.medium || match.volumeInfo.imageLinks.thumbnail;
       if (!image) return null;
       const secure = image.replace(/^http:/, "https:");
+      if (failedPhotoUrls.has(secure)) return null;
       return {
         url: secure,
         attribution: "Portada editorial · Google Books",
@@ -81,8 +83,10 @@
       const match = (data.docs || []).find(item =>
         normalize(item.title) === normalize(title) && item.cover_i);
       if (!match) return null;
+      const coverUrl = "https://covers.openlibrary.org/b/id/" + match.cover_i + "-L.jpg";
+      if (failedPhotoUrls.has(coverUrl)) return null;
       return {
-        url: "https://covers.openlibrary.org/b/id/" + match.cover_i + "-L.jpg",
+        url: coverUrl,
         attribution: "Portada editorial · Open Library",
         sourceUrl: "https://openlibrary.org" + (match.key || ""),
         license: "Portada bibliográfica; derechos de sus respectivos titulares"
@@ -106,7 +110,7 @@
         const pages = Object.values((data.query && data.query.pages) || {});
         const candidates = pages.map(page => {
           const info = page.imageinfo && page.imageinfo[0];
-          if (!info || !info.thumburl || !/^image\/(jpeg|png|webp)$/i.test(info.mime || "")) return null;
+          if (!info || !info.thumburl || failedPhotoUrls.has(info.thumburl) || !/^image\/(jpeg|png|webp)$/i.test(info.mime || "")) return null;
           const width = Number(info.width || 0), height = Number(info.height || 0);
           const ratio = height ? width / height : 0;
           const fileName = normalize(page.title);
@@ -162,11 +166,13 @@
     image.decoding = "async";
     image.fetchPriority = "low";
     image.addEventListener("error", function () {
-      image.classList.add("cover-image-error");
-      shell.classList.add("cover-unavailable");
-      button.disabled = true;
-      const label = makeElement("span", "cover-error-label", "Imagen no disponible");
-      cover.append(label);
+      failedPhotoUrls.add(book.coverImage);
+      book.coverImage = null;
+      book.coverAttribution = null;
+      book.coverSourceUrl = null;
+      book.coverLicense = null;
+      shell.remove();
+      window.putItem("books", book).then(function () { ensureCover(book); }).catch(function () {});
     }, { once: true });
     const shade = makeElement("div", "book-cover-shade");
     const title = makeElement("strong", "book-cover-title", book.title || "Mi historia");
