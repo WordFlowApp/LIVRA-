@@ -352,7 +352,8 @@
         const validRemoteImage = /^https:\/\//i.test(book.coverImage || "");
         const validGeneratedImage = /^data:image\/(png|jpeg|webp);base64,/i.test(book.coverImage || "");
         const supportedImage = validRemoteImage || validGeneratedImage;
-        const duplicateCover = supportedImage && seenCoverImages.has(book.coverImage);\n        if (supportedImage && !duplicateCover) seenCoverImages.add(book.coverImage);
+        const duplicateCover = supportedImage && seenCoverImages.has(book.coverImage);
+        if (supportedImage && !duplicateCover) seenCoverImages.add(book.coverImage);
         if (book.coverVersion !== COVER_VERSION || (book.coverImage && !supportedImage) || duplicateCover) {
           book.coverImage = null;
           book.coverAttribution = null;
