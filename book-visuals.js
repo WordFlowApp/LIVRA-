@@ -198,8 +198,11 @@
   }
   async function photographicCover(title, source, fullBook) {
     const book = fullBook || { title: title, summary: source };
-    const editorial = await exactGoogleBook(title) || await exactOpenLibraryBook(title);
-    if (editorial) return editorial;
+    const hasPublishedEdition = Boolean(book.isbn || book.googleBooksId || book.openLibraryKey || book.publishedEditionId || book.sourceType === "published");
+    if (hasPublishedEdition) {
+      const editorial = await exactGoogleBook(title) || await exactOpenLibraryBook(title);
+      if (editorial) return editorial;
+    }
     try {
       return await aiGeneratedCover(book, source);
     } catch (error) {
