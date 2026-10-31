@@ -286,3 +286,28 @@
   #library .book-card,#library .book-cover-photo{transition:none}
   #library .cover-preparing-pulse{animation:none}
 }
+/* LIVRA mobile upgrade: three-column bookshelf and nine-line live transcript */
+#library.screen.active{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#library .book-grid{display:flex;flex-direction:column;gap:20px}
+#library .book-rail.book-shelf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:2px 0 10px;overflow:visible}
+#library .book-card-shell{width:100%;min-width:0;flex:initial;scroll-snap-align:unset}
+#library .book-cover{aspect-ratio:2/3;border-radius:10px}
+#library .book-cover-title{left:7px;right:7px;bottom:26px;font-size:clamp(12px,3.5vw,16px)!important;max-height:4.2em}
+#library .book-cover-meta{left:7px;right:7px;bottom:8px;font-size:7px!important;letter-spacing:.5px}
+#library .book-credit{font-size:8px}
+#recording .transcript-edit{flex:0 0 auto;height:clamp(230px,34dvh,310px);min-height:230px;max-height:38dvh;line-height:1.42;overflow-y:auto;scroll-behavior:smooth}
+#recording .mic-visual{width:min(24vw,88px);height:min(24vw,88px)}
+#recording .mic-glyph{font-size:clamp(38px,9vw,50px)}
+#recording .waveform{height:19px;flex-basis:19px}
+#recording .record-controls{margin-top:0}
+#recording .control-button{min-height:58px}
+@media(max-height:760px){
+ #recording .transcript-edit{height:30dvh;min-height:205px;max-height:33dvh}
+ #recording .mic-visual{width:70px;height:70px}
+ #recording .mic-glyph{font-size:38px}
+ #recording .waveform{height:16px;flex-basis:16px}
+}
+@media(max-width:350px){
+ #library .book-rail.book-shelf-grid{gap:8px}
+ #library .book-cover-title{font-size:11px!important}
+}
