@@ -114,6 +114,8 @@ function renderLibrary(){
   const root=$("bookGrid");
   root.replaceChildren();
   root.classList.remove("hidden");
+  root.classList.toggle("is-empty",books.length===0);
+  root.setAttribute("aria-label",books.length ? "Biblioteca con "+books.length+" libros" : "Biblioteca vacía con nueve espacios para crear libros");
   $("emptyLibrary").classList.add("hidden");
   $("librarySubtitle").textContent=books.length?books.length+" libro"+(books.length===1?"":"s")+" creado"+(books.length===1?"":"s"):"Tu biblioteca está esperando tus historias.";
   books.forEach(function(book,index){
