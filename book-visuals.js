@@ -105,15 +105,13 @@
   }
   function coverArtDirection(book, source) {
     return [
-      "Create an original, premium editorial BOOK COVER IMAGE for the following book.",
-      "FORMAT: vertical portrait 2:3 composition, full bleed edge-to-edge artwork.",
-      "STYLE: vivid full-color photorealistic cinematic editorial photography, rich natural color, professional publishing quality, beautiful light, visual depth.",
-      "SUBJECT: depict the actual themes, people, setting, emotions and subject matter in the book content below. Make this cover distinctive to this exact book, not generic stock art.",
-      "COMPOSITION: one strong central visual subject, refined visual storytelling, enough darker or calmer negative space near the lower third for title typography to be overlaid by the app.",
-      "DO NOT create geometric rectangles, abstract gradients, book mockups, bookshelves, logos, watermarks, text, lettering, typography, icons or graphic placeholders. The image itself must be the dominant visual.",
       "BOOK TITLE: " + cleanText(book.title),
-      "BOOK CONTENT AND CONTEXT: " + String(source || "").slice(0, 9000)
-    ].join("\n\n");
+      "ACTUAL BOOK CONTENT: " + String(source || "").replace(/\\s+/g, " ").slice(0, 900),
+      "Create a unique premium full-color photorealistic editorial BOOK COVER IMAGE based on the actual content above.",
+      "VERTICAL PORTRAIT 2:3, full-bleed edge-to-edge photographic artwork, cinematic natural light, rich colors, professional publishing quality, visual depth.",
+      "Show a distinctive central scene that reflects this exact book's subject, setting and emotional tone. The artwork must be the dominant visual element.",
+      "No geometric rectangles, abstract gradients, book mockups, bookshelves, logos, watermarks, text, lettering, typography, icons or graphic placeholders. Leave calm negative space near the lower third for the app to overlay the title."
+    ].join("\\n\\n");
   }
   async function aiGeneratedCover(book, source) {
     const response = await fetch(LIVRA_EDITOR_API + "/cover", {
