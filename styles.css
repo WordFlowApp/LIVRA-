@@ -717,3 +717,31 @@ footer{color:#8fa7b8}
 @media(min-width:700px){
   #library .book-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:900px!important;align-self:center!important}
 }
+
+
+/* LIVRA 4.9 — visual consistency and mobile-first streaming library */
+:root{--livra-font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+body,button,input,textarea,select{font-family:var(--livra-font)!important}
+.topbar{position:relative;display:flex;align-items:center;justify-content:space-between}
+.topbar-brand{display:flex;align-items:center;gap:9px}
+.global-menu-button{width:44px;height:44px;border:1px solid rgba(225,196,126,.55);border-radius:13px;background:#102b50;color:#f6dfaa;font-size:23px}
+.global-menu{position:absolute;z-index:100;right:12px;top:calc(100% + 8px);min-width:190px;padding:8px;border:1px solid rgba(225,196,126,.45);border-radius:15px;background:#091d39;box-shadow:0 12px 30px #0008;display:grid;gap:5px}
+.global-menu button{min-height:42px;text-align:left;padding:9px 12px;border:0;border-radius:9px;background:transparent;color:#f6f0e4;font-size:15px}
+.global-menu button:active,.global-menu button:focus{background:#183b66}
+.minimum-duration{margin:-8px 0 2px;text-align:center;color:#e5c779;font-size:14px;font-weight:700;letter-spacing:.2px}
+.minimum-duration.is-complete{color:#8fe0b0}
+#recording .transcript-edit{min-height:0;height:calc(100% + 3.5em);padding:13px;line-height:1.48}
+#recording #cancelRecording{min-height:50px;padding:10px 14px}
+#home .big-button{min-height:58px;border-radius:16px;font-size:17px;letter-spacing:.35px;box-shadow:0 5px 14px #0003}
+#home .hero-icon{display:none}
+#home .record-home,#home .library-home{max-width:310px;width:86%;margin-inline:auto}
+.library-brand-lockup img,.mini-icon{display:none!important}
+#library .book-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px 10px;align-items:start;width:100%;overflow-y:auto;overflow-x:hidden}
+#library .book-card{width:100%;min-width:0}
+#library .book-cover{width:100%;aspect-ratio:2/3;border-radius:10px;padding:7px;overflow:hidden}
+#library .book-cover strong,#library .book-cover-title{font-size:clamp(10px,2.7vw,15px);line-height:1.16}
+#library .book-cover-photo{width:100%;height:100%;object-fit:cover}
+#library .book-card::after{display:none}
+#library .book-card-shell{min-width:0}
+#library .book-collection,#library .book-shelf-grid{min-width:0}
+@media(min-width:560px){#library .book-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 14px}}
