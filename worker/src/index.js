@@ -63,7 +63,7 @@ export default {
           "ETAPA 1 — COMPRENDER: identificá el tema central, quién narra, qué quiere contar, los momentos o ideas decisivas, el conflicto o pregunta que mueve el relato y el tono que mejor le corresponde. Detectá si el material es un cuento, una memoria personal, una autobiografía, una crónica, una reflexión o un ensayo. Elegí el género que realmente surge del audio.",
           "ETAPA 2 — EDITAR: corregí errores de reconocimiento de voz usando el contexto; eliminá muletillas, redundancias, falsos comienzos y frases rotas; ordená las ideas; uní ideas dispersas; mejorá ritmo, transiciones, precisión, vocabulario y puntuación. Convertí lo oral en prosa clara, expresiva y fluida. No reduzcas todo a un resumen.",
           "FIDELIDAD: la transcripción es la única fuente de verdad. Conservá nombres, relaciones, lugares, fechas, hechos y sentido. No inventes escenas, acontecimientos, personajes, diálogos textuales ni recuerdos. Reconstruí escenas solo con detalles presentes en la fuente. Si falta un dato, omitilo.",
-          "ARQUITECTURA DEL LIBRO: construí un recorrido con apertura que atrape, desarrollo con progresión y cierre satisfactorio. Creá entre 2 y 6 capítulos según la cantidad y riqueza del material. Cada capítulo debe tener un propósito propio, un título atractivo y desarrollo real; no dividas artificialmente un texto corto ni repitas párrafos. Si el audio cuenta un cuento, conservá su trama y dale forma de cuento literario con escenas, tensión y desenlace. Si es una historia real, tratala como memoria o crónica, sin ficcionalizarla.",
+          "ARQUITECTURA DEL LIBRO: construí un recorrido con apertura que atrape, desarrollo con progresión y cierre satisfactorio. Creá entre 2 y 4 capítulos según la cantidad y riqueza del material. Cada capítulo debe tener un propósito propio, un título atractivo y desarrollo real; no dividas artificialmente un texto corto ni repitas párrafos. Si el audio cuenta un cuento, conservá su trama y dale forma de cuento literario con escenas, tensión y desenlace. Si es una historia real, tratala como memoria o crónica, sin ficcionalizarla.",
           "PRÓLOGO — PRIORIDAD MÁXIMA: escribí un prólogo genuino, íntimamente conectado con ESTA historia. Debe nacer de una imagen, pregunta, tensión, recuerdo o idea concreta de la transcripción. Presentá al lector el corazón del libro y por qué vale la pena entrar en él, con voz literaria cálida y segura. No uses fórmulas como 'este libro es un viaje', 'en estas páginas descubrirás' ni introducciones genéricas. No inventes un episodio para hacerlo emotivo. El prólogo debe aportar una mirada editorial nueva y no repetir el resumen ni anticipar todo el contenido. Usá 3 a 5 párrafos sustanciosos cuando la fuente lo permita; si es breve, escribí uno más corto y preciso.",
           "RESUMEN: redactá una sinopsis editorial atractiva y concreta, sin revelar necesariamente el final. Describí el tema real y despertá interés. No repitas el prólogo.",
           "CAPÍTULOS: escribí prosa continua, con párrafos desarrollados, imágenes y recursos narrativos solo cuando nazcan naturalmente del material. Evitá listas, moralejas agregadas, subtítulos internos innecesarios y frases que suenen a IA. Cada capítulo debe avanzar la historia o profundizar una idea. Cerrá el libro con intención, no de golpe.",
@@ -109,43 +109,35 @@ export default {
           }
           return { title: title.slice(0, 180), subtitle: subtitle.slice(0, 240), summary, prologue, chapters };
         };
-        const runEditor = async (messages, maxTokens) => {
-          const result = await env.AI.run(model, {
-            messages,
-            max_tokens: maxTokens,
-            temperature: 0.55,
-            top_p: 0.9,
-            repetition_penalty: 1.08
-          });
-          return String(result && result.response || "").trim();
+        const runEditor = async (messages) => {
+          let timer;
+          try {
+            const result = await Promise.race([
+              env.AI.run(model, {
+                messages,
+                max_tokens: 6000,
+                temperature: 0.55,
+                top_p: 0.9,
+                repetition_penalty: 1.08
+              }),
+              new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error("LIVRA_COMPOSE_TIMEOUT")), 65000);
+              })
+            ]);
+            return String(result && result.response || "").trim();
+          } finally {
+            clearTimeout(timer);
+          }
         };
-        let book;
-        let firstError = "";
-        try {
-          const output = await runEditor([
-            { role: "system", content: systemMessage },
-            { role: "user", content: prompt }
-          ], 8500);
-          book = parseBook(output);
-        } catch (error) {
-          firstError = String(error && error.message || error).slice(0, 300);
-          const repairPrompt = [
-            "La respuesta anterior no pudo utilizarse como libro completo. Volvé a trabajar desde la transcripción original y entregá el libro entero, no una explicación ni un resumen.",
-            "Devolvé exclusivamente un JSON válido, sin Markdown, con estas claves exactas: title (string), subtitle (string), summary (string), prologue (string), chapters (array de 2 a 6 objetos con title y text como strings).",
-            "Cada capítulo debe contener prosa desarrollada y superar los 120 caracteres. No dejes campos vacíos, no uses marcadores, no cortes el texto y no inventes hechos.",
-            "Error detectado en el primer intento: " + firstError,
-            "INSTRUCCIONES EDITORIALES Y TRANSCRIPCIÓN ORIGINAL:",
-            prompt
-          ].join("\n\n");
-          const repaired = await runEditor([
-            { role: "system", content: systemMessage + " Si recibís una solicitud de reparación, reconstruí el objeto completo y validá mentalmente que sea JSON correcto y que todos los campos estén completos." },
-            { role: "user", content: repairPrompt }
-          ], 8500);
-          book = parseBook(repaired);
-        }
-        return Response.json({ ...book, model, repaired: Boolean(firstError) }, { headers: cors });
+        const output = await runEditor([
+          { role: "system", content: systemMessage },
+          { role: "user", content: prompt }
+        ]);
+        const book = parseBook(output);
+        return Response.json({ ...book, model }, { headers: cors });
       } catch (error) {
-        return Response.json({ error: "No se pudo editar el libro con IA. Probá otra vez; tu grabación original sigue guardada." }, { status: 502, headers: cors });
+        const timedOut = String(error && error.message || error).includes("LIVRA_COMPOSE_TIMEOUT");
+        return Response.json({ error: timedOut ? "La edición literaria superó el tiempo de espera. Tu grabación sigue guardada." : "No se pudo editar el libro con IA. Tu grabación original sigue guardada." }, { status: timedOut ? 504 : 502, headers: cors });
       }
     }
     if (request.method !== "POST" || url.pathname !== "/transcribe") {
