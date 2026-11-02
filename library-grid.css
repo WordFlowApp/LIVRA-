@@ -1,0 +1,89 @@
+/* LIVRA 4.9.2 — isolated library layout repair. Loaded last to neutralize legacy cascade conflicts. */
+#library.screen.active{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  width:100%!important;
+  height:calc(100svh - 122px)!important;
+  min-height:0!important;
+  max-height:calc(100svh - 122px)!important;
+  overflow:hidden!important;
+  gap:clamp(8px,1.4vh,12px)!important;
+}
+#library .library-brand-heading,
+#library .amazon-button,
+#library #libraryRecord,
+#library #libraryHome{
+  flex:0 0 auto!important;
+}
+#library .book-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  grid-auto-rows:max-content!important;
+  align-items:start!important;
+  align-content:start!important;
+  justify-items:stretch!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-height:none!important;
+  flex:1 1 0!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  gap:clamp(9px,2.2vw,14px)!important;
+  padding:8px 3px 20px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  background:repeating-linear-gradient(180deg,transparent 0,transparent 236px,rgba(184,133,82,.20) 237px,rgba(232,190,133,.38) 242px,rgba(91,51,29,.45) 248px,transparent 255px)!important;
+  filter:none!important;
+  scroll-behavior:smooth;
+}
+#library .book-grid>.book-card{
+  display:block!important;
+  position:relative!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  align-self:start!important;
+  box-sizing:border-box!important;
+}
+#library .book-grid>.book-card .book-cover{
+  display:flex!important;
+  position:relative!important;
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:2/3!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+  border-radius:9px!important;
+}
+#library .book-grid>.book-card .book-cover-photo{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#10243a!important;
+}
+#library .book-grid>.book-card .book-cover-title{
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+#library .book-grid>.book-card-placeholder{pointer-events:auto!important}
+#library .empty-state{display:none!important}
+@media(min-width:700px){
+  #library .book-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:900px!important;align-self:center!important}
+}
+@media(max-height:650px){
+  #library.screen.active{height:calc(100svh - 108px)!important;max-height:calc(100svh - 108px)!important}
+}
