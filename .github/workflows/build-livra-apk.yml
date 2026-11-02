@@ -44,13 +44,13 @@ jobs:
           assert.match(app, /coverStyle:"typographic"/);
           assert.match(app, /await getAll\("books"\)/);
           assert.doesNotMatch(app, /recoverMissingBookCovers|generateAICover|\/cover/);
-          assert.doesNotMatch(html, /book-visuals\\.js|book-visuals\\.css/);
-          assert.match(html, /LIVRA 4\\.9\\.4/);
+          assert.doesNotMatch(html, /book-visuals\.js|book-visuals\.css/);
+          assert.match(html, /LIVRA 4\.9\.4/);
           assert.match(worker, /status: 410/);
           assert.match(worker, /superó el límite de 40 segundos/);
           assert.match(coverCss, /book-cover-typographic/);
-          assert.match(gridCss, /grid-template-columns:\\s*repeat\\(3/);
-          assert.match(gradle, /versionName '4\\.9\\.4'/);
+          assert.match(gridCss, /grid-template-columns:\s*repeat\(3/);
+          assert.match(gradle, /versionName '4\.9\.4'/);
           assert.match(gradle, /versionCode 18/);
           console.log('LIVRA 4.9.4 static checks passed.');
           NODE
