@@ -14,7 +14,7 @@ function updateTranscript(value){const field=$("transcriptEdit");field.value=val
 function updateMinimumDuration(){const hint=document.querySelector(".minimum-duration");if(!hint)return;const remaining=Math.max(0,120-seconds);hint.textContent=remaining>0?"Duración mínima: 2 minutos · faltan "+formatTime(remaining):"Duración mínima alcanzada · ya podés finalizar";hint.classList.toggle("is-complete",remaining===0);}
 function openDB(){return new Promise(function(resolve,reject){const request=indexedDB.open("livra-local",3);request.onupgradeneeded=function(){const d=request.result;if(!d.objectStoreNames.contains("recordings"))d.createObjectStore("recordings",{keyPath:"id",autoIncrement:true});if(!d.objectStoreNames.contains("books"))d.createObjectStore("books",{keyPath:"id",autoIncrement:true});};request.onsuccess=function(){resolve(request.result);};request.onerror=function(){reject(request.error);};});}
 async function getAll(storeName){const d=await openDB();return new Promise(function(resolve,reject){const r=d.transaction(storeName,"readonly").objectStore(storeName).getAll();r.onsuccess=function(){resolve(r.result||[]);};r.onerror=function(){reject(r.error);};});}
-async function addItem(storeName,item){const d=await openDB();return new Promise(function(resolve,reject){const r=d.transaction(storeName,"readwrite").objectStore(storeName).add(item);r.onsuccess=function(){resolve(r.result);};r.onerror=function(){reject(r.error);};});}
+async function addItem(storeName,item){const d=await openDB();return new Promise(function(resolve,reject){const tx=d.transaction(storeName,"readwrite");const r=tx.objectStore(storeName).add(item);let id=null;r.onsuccess=function(){id=r.result;};tx.oncomplete=function(){resolve(id);};tx.onerror=function(){reject(tx.error||r.error);};tx.onabort=function(){reject(tx.error||new Error("La transacción de almacenamiento fue cancelada."));};});}
 async function deleteItem(storeName,id){const d=await openDB();return new Promise(function(resolve,reject){const r=d.transaction(storeName,"readwrite").objectStore(storeName).delete(id);r.onsuccess=function(){resolve();};r.onerror=function(){reject(r.error);};});}
 async function putItem(storeName,item){const d=await openDB();return new Promise(function(resolve,reject){const tx=d.transaction(storeName,"readwrite");tx.objectStore(storeName).put(item);tx.oncomplete=function(){resolve();};tx.onerror=function(){reject(tx.error);};});}
 function historyTitle(n){return "Grabación "+n;}
@@ -82,10 +82,10 @@ function coverClass(index){return "cover-tone-"+(index%5+1);}
 const LIVRA_EDITOR_API="https://livra-transcription.talitaescuela.workers.dev";
 $("publishAmazon").addEventListener("click",function(){window.location.assign("https://www.amazon.com/books-used-books-textbooks/b?node=283155");});
 function splitIntoBookPages(text,heading){const clean=String(text||"").replace(/\s+/g," ").trim();if(!clean)return [];const sentences=clean.split(/(?<=[.!?])\s+/);const pages=[];let buffer="";sentences.forEach(function(sentence){if((buffer+" "+sentence).trim().length>620&&buffer){pages.push(buffer.trim());buffer=sentence;}else buffer=(buffer+" "+sentence).trim();});if(buffer)pages.push(buffer);return pages.map(function(body,index){return {heading:index===0?heading:heading+" (continuación)",body:body};});}
-async function generateAICover(title,source){let lastError;for(let attempt=0;attempt<2;attempt++){try{const response=await fetch(LIVRA_EDITOR_API+"/cover",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:title,text:String(source||"").slice(0,1800)})});if(!response.ok){let detail="";try{const data=await response.json();detail=data.error||"";}catch(e){}throw new Error(detail||"El servicio de tapas respondió "+response.status+".");}const blob=await response.blob();if(!blob.size||!String(blob.type||"").includes("image"))throw new Error("La IA no devolvió una imagen válida.");return await new Promise(function(resolve,reject){const reader=new FileReader();reader.onload=function(){resolve(String(reader.result));};reader.onerror=reject;reader.readAsDataURL(blob);});}catch(error){lastError=error;if(attempt===0)await new Promise(function(resolve){setTimeout(resolve,900);});}}throw lastError||new Error("No se pudo generar la tapa.");}
-async function transcribeSavedAudio(item){if(!item||!item.blob)throw new Error("No se encontró el audio guardado.");if(item.blob.size>20*1024*1024)throw new Error("El audio supera los 20 MB. Dividí la historia en grabaciones más cortas.");const form=new FormData();const originalName=String(item.fileName||"").trim();const nameExt=(originalName.match(/\.([a-z0-9]{2,5})$/i)||[])[1];const mimeExt={"audio/wav":"wav","audio/x-wav":"wav","audio/mpeg":"mp3","audio/mp3":"mp3","audio/mp4":"m4a","audio/x-m4a":"m4a","audio/aac":"aac","audio/ogg":"ogg","audio/opus":"opus","audio/webm":"webm"};const ext=(nameExt||mimeExt[item.blob.type]||((item.blob.type||"").includes("wav")?"wav":"webm")).toLowerCase();form.append("audio",item.blob,"livra-recording."+ext);const response=await fetch(LIVRA_EDITOR_API+"/transcribe",{method:"POST",body:form});let data={};try{data=await response.json();}catch(e){}if(!response.ok)throw new Error(data.error||"No se pudo transcribir una de las grabaciones.");const transcript=String(data.text||"").trim();if(!transcript)throw new Error("La transcripción llegó vacía. Tu audio sigue guardado.");item.transcript=transcript;await putItem("recordings",item);return transcript;}
+function localDraftFromTranscript(transcript,requestedTitle,reason){const source=String(transcript||"").trim();const title=descriptiveAudioTitle(source)||requestedTitle||"Mi historia";const pages=[{heading:"Resumen",body:source?source.slice(0,900):"Tu grabación original está guardada y vinculada a este libro. Podés volver a transcribirla cuando tengas conexión.",section:"summary"}];if(source){splitIntoBookPages(source,"Tu historia").forEach(function(page){pages.push({heading:page.heading,body:page.body,section:"chapter"});});}else{pages.push({heading:"Transcripción pendiente",body:"La grabación original permanece guardada en LIVRA. No se perdió el audio. Volvé a intentar la transcripción desde tus grabaciones cuando tengas conexión.",section:"chapter"});}return {title:title,subtitle:"Una historia contada con tu voz",summary:source?source.slice(0,900):"Edición inicial pendiente de transcripción.",prologue:source?"Esta edición inicial conserva el texto original de tu relato. La versión literaria podrá completarse cuando el servicio de inteligencia artificial vuelva a estar disponible.":"La grabación original está conservada en LIVRA. Esta edición inicial mantiene el vínculo con el audio para que puedas continuar más adelante.",pages:pages,localDraft:true,draftReason:String(reason||"No se pudo completar la edición con IA.").slice(0,240)};}
+async function transcribeSavedAudio(item){if(!item||!item.blob)throw new Error("No se encontró el audio guardado.");if(item.blob.size>20*1024*1024)throw new Error("El audio supera los 20 MB. Dividí la historia en grabaciones más cortas.");const form=new FormData();const originalName=String(item.fileName||"").trim();const nameExt=(originalName.match(/\.([a-z0-9]{2,5})$/i)||[])[1];const mimeExt={"audio/wav":"wav","audio/x-wav":"wav","audio/mpeg":"mp3","audio/mp3":"mp3","audio/mp4":"m4a","audio/x-m4a":"m4a","audio/aac":"aac","audio/ogg":"ogg","audio/opus":"opus","audio/webm":"webm"};const ext=(nameExt||mimeExt[item.blob.type]||((item.blob.type||"").includes("wav")?"wav":"webm")).toLowerCase();form.append("audio",item.blob,"livra-recording."+ext);const controller=new AbortController();const timeout=window.setTimeout(function(){controller.abort();},55000);let response;try{response=await fetch(LIVRA_EDITOR_API+"/transcribe",{method:"POST",body:form,signal:controller.signal});}catch(error){if(error&&error.name==="AbortError")throw new Error("La transcripción tardó demasiado. Tu audio original sigue guardado.");throw error;}finally{window.clearTimeout(timeout);}let data={};try{data=await response.json();}catch(e){}if(!response.ok)throw new Error(data.error||"No se pudo transcribir una de las grabaciones.");const transcript=String(data.text||"").trim();if(!transcript)throw new Error("La transcripción llegó vacía. Tu audio sigue guardado.");item.transcript=transcript;await putItem("recordings",item);return transcript;}
 async function composeBook(source,title){
- const response=await fetch(LIVRA_EDITOR_API+"/compose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:title,text:source})});
+ const controller=new AbortController();const timeout=window.setTimeout(function(){controller.abort();},95000);let response;try{response=await fetch(LIVRA_EDITOR_API+"/compose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:title,text:source}),signal:controller.signal});}catch(error){if(error&&error.name==="AbortError")throw new Error("La edición literaria superó el tiempo límite.");throw error;}finally{window.clearTimeout(timeout);}
  let data={};try{data=await response.json();}catch(e){}
  if(!response.ok)throw new Error(data.error||"El editor literario no respondió.");
  const plain=function(value){if(typeof value==="string")return value.trim();if(typeof value==="number")return String(value);if(Array.isArray(value))return value.map(plain).filter(Boolean).join("\n\n");if(value&&typeof value==="object"){for(const key of ["text","content","body","value","paragraph","narrative"]){if(value[key]!==undefined){const out=plain(value[key]);if(out)return out;}}return Object.values(value).map(plain).filter(Boolean).join("\n\n");}return "";};
@@ -96,21 +96,29 @@ async function composeBook(source,title){
  if(pages.length<3||pages.some(function(page){return typeof page.body!=="string"||page.body.includes("[object Object]");}))throw new Error("La IA devolvió páginas incompletas. Tu grabación sigue guardada; intentá nuevamente.");
  return {title:finalTitle,subtitle:subtitle,summary:summary,prologue:prologue,pages:pages};
 }
+let buildingBook=false;
 $("buildBook").addEventListener("click",async function(){
+ const button=$("buildBook");if(buildingBook)return;
  const chosen=recordings.filter(function(item){return selectedAudioIds.has(item.id);});
  if(!chosen.length){toast("Seleccioná al menos una grabación.");return;}
- let transcript="";
- const title=chosen.length===1?(chosen[0].title||"Mi historia"):"Mis historias";
- const button=$("buildBook");button.disabled=true;button.textContent="✍️ PREPARANDO TU LIBRO…";toast("Estamos preparando la transcripción y el libro con inteligencia artificial.");
+ buildingBook=true;let transcript="";
+ const requestedTitle=chosen.length===1?(chosen[0].title||"Mi historia"):"Mis historias";
+ button.disabled=true;button.textContent="✍️ PREPARANDO TU LIBRO…";
+ toast("Estamos preparando tu libro. Tus grabaciones originales permanecen guardadas.");
  try{
-  const parts=[];for(const item of chosen){let text=(item.transcript||"").trim();if(text.length<5){button.textContent="🎙 TRANSCRIBIENDO…";text=await transcribeSavedAudio(item);}if(text)parts.push(text);}
-  transcript=parts.join("\n\n");if(transcript.length<80)throw new Error("La historia necesita más texto para crear un libro. El audio permanece guardado.");
-  button.textContent="✍️ LA IA ESTÁ ESCRIBIENDO…";
-  const composed=await composeBook(transcript,title);
-  const book={type:"book",title:composed.title,subtitle:composed.subtitle||"",createdAt:new Date().toISOString(),audioIds:chosen.map(function(item){return item.id;}),transcript:transcript,summary:composed.summary,prologue:composed.prologue,pages:composed.pages,coverImage:null,coverVersion:46,coverTone:Math.floor(Math.random()*5),localDraft:false};
-  book.id=await addItem("books",book);selectedAudioIds.clear();show("library");renderLibrary();toast("¡Libro creado con edición literaria! LIVRA está preparando su portada personalizada…");
- }catch(e){toast((e&&e.message?e.message:"No se pudo editar el libro.")+" Tu grabación sigue guardada.");}
- finally{button.disabled=selectedAudioIds.size===0;button.innerHTML='<span class="button-icon">▤</span> ARMAR LIBRO';}
+  const parts=[];
+  for(const item of chosen){let text=(item.transcript||"").trim();if(text.length<5){button.textContent="🎙 TRANSCRIBIENDO…";try{text=await transcribeSavedAudio(item);}catch(err){console.warn("LIVRA transcription fallback:",err);text=(item.transcript||"").trim();}}if(text)parts.push(text);}
+  transcript=parts.join("\n\n").trim();let composed;
+  if(transcript.length>=5){try{button.textContent="✍️ LA IA ESTÁ ESCRIBIENDO…";composed=await composeBook(transcript,requestedTitle);}catch(err){console.warn("LIVRA compose fallback:",err);composed=localDraftFromTranscript(transcript,requestedTitle,err&&err.message);}}
+  else composed=localDraftFromTranscript("",requestedTitle,"No se pudo obtener la transcripción. El audio original permanece guardado.");
+  button.textContent="💾 GUARDANDO TU LIBRO…";
+  const book={type:"book",title:composed.title||requestedTitle,subtitle:composed.subtitle||"",createdAt:new Date().toISOString(),audioIds:chosen.map(function(item){return item.id;}),transcript:transcript,summary:composed.summary||"",prologue:composed.prologue||"",pages:Array.isArray(composed.pages)?composed.pages:[],coverImage:null,coverStyle:"typographic",coverVersion:493,coverTone:Math.floor(Math.random()*5),localDraft:Boolean(composed.localDraft),draftReason:composed.draftReason||"",authorName:"Tu historia"};
+  book.id=await addItem("books",book);const persisted=await getAll("books");
+  if(!persisted.some(function(saved){return String(saved.id)===String(book.id);}))throw new Error("No pudimos confirmar el guardado del libro. Tus grabaciones originales siguen intactas.");
+  selectedAudioIds.clear();show("library");
+  toast(book.localDraft?"Guardamos una edición inicial con tu texto original. Podés completar la edición literaria más adelante.":"¡Tu libro está creado y guardado en la biblioteca!");
+ }catch(err){console.error("LIVRA build book:",err);toast((err&&err.message?err.message:"No se pudo guardar el libro.")+" Tus grabaciones originales siguen guardadas.");}
+ finally{buildingBook=false;button.innerHTML='<span class="button-icon">▤</span> ARMAR LIBRO';button.disabled=selectedAudioIds.size===0;}
 });
 
 function renderLibrary(){
@@ -132,25 +140,15 @@ function renderLibrary(){
    const cover=document.createElement("div");
    cover.className="book-cover "+coverClass(Number.isInteger(book.coverTone)?book.coverTone:index);
    if(book.coverImage){
-    const poster=document.createElement("img");
-    poster.className="book-cover-photo";
-    poster.src=book.coverImage;
-    poster.alt="Portada de "+(book.title||"Mi historia");
-    poster.loading="lazy";
-    poster.decoding="async";
-    cover.append(poster);
-   }
-   const shade=document.createElement("div"); shade.className="book-cover-shade";
-   const mini=document.createElement("img"); mini.className="book-cover-logo"; mini.src="./icons/livra.svg?v=20"; mini.alt="LIVRA";
-   const title=document.createElement("strong"); title.className="book-cover-title"; title.textContent=book.title||"Mi historia";
-   const sub=document.createElement("span"); sub.className="book-cover-meta"; sub.textContent="LIVRA · "+dateText(book.createdAt);
-   cover.append(shade,mini,title,sub);
-   if(!book.coverImage){
-    const placeholder=document.createElement("span");
-    placeholder.className="book-cover-placeholder";
-    placeholder.textContent="✦";
-    placeholder.setAttribute("aria-hidden","true");
-    cover.append(placeholder);
+    const poster=document.createElement("img");poster.className="book-cover-photo";poster.src=book.coverImage;
+    poster.alt="Portada original de "+(book.title||"Mi historia");poster.loading="lazy";poster.decoding="async";cover.append(poster);
+   }else{
+    cover.classList.add("book-cover-typographic");
+    const kicker=document.createElement("span");kicker.className="book-cover-kicker";kicker.textContent="LIVRA ORIGINAL";
+    const ornament=document.createElement("span");ornament.className="book-cover-ornament";ornament.textContent="✦";
+    const title=document.createElement("strong");title.className="book-cover-title";title.textContent=book.title||"Mi historia";
+    const subtitle=document.createElement("span");subtitle.className="book-cover-subtitle";subtitle.textContent=book.subtitle||"Una historia contada con tu voz";
+    const meta=document.createElement("span");meta.className="book-cover-meta";meta.textContent=dateText(book.createdAt);cover.append(kicker,ornament,title,subtitle,meta);
    }
    button.append(cover);
    button.addEventListener("click",function(){previewBook(book);});
@@ -175,23 +173,20 @@ function renderLibrary(){
  }).catch(function(){toast("No se pudo cargar la biblioteca.");});
 }
 function previewBook(book){
- activeBook=book;
- const cover=$("bookPreviewArtwork");
- cover.style.backgroundImage=book.coverImage?"linear-gradient(180deg,rgba(5,18,40,.08),rgba(5,18,40,.68)),url("+JSON.stringify(book.coverImage)+")":"linear-gradient(145deg,#284766,#0a1a30)";
- $("bookPreviewTitle").textContent=book.title||"Mi historia";
- $("bookPreviewAuthor").textContent=book.author||"Autor: "+(book.authorName||"Tu historia");
- $("bookPreviewDate").textContent="Creado el "+dateText(book.createdAt);
- show("bookPreview");
+ activeBook=book;const cover=$("bookPreviewArtwork");cover.replaceChildren();cover.classList.toggle("typographic-preview",!book.coverImage);
+ cover.style.backgroundImage=book.coverImage?"linear-gradient(180deg,rgba(5,18,40,.08),rgba(5,18,40,.68)),url("+JSON.stringify(book.coverImage)+")":"";
+ if(!book.coverImage){const kicker=document.createElement("span");kicker.className="book-cover-kicker";kicker.textContent="LIVRA ORIGINAL";const ornament=document.createElement("span");ornament.className="book-cover-ornament";ornament.textContent="✦";const title=document.createElement("strong");title.textContent=book.title||"Mi historia";const subtitle=document.createElement("span");subtitle.textContent=book.subtitle||"Una historia contada con tu voz";cover.append(kicker,ornament,title,subtitle);}
+ $("bookPreviewTitle").textContent=book.title||"Mi historia";$("bookPreviewAuthor").textContent=book.author||"Autor: "+(book.authorName||"Tu historia");$("bookPreviewDate").textContent="Creado el "+dateText(book.createdAt);show("bookPreview");
 }
 $("previewReadBook").addEventListener("click",function(){if(activeBook)openBook(activeBook);});
 $("previewBack").addEventListener("click",function(){show("library");});
-function openBook(book){stopAudiobook(false);activeBook=book;bookPages=Array.isArray(book.pages)&&book.pages.length?book.pages:makeBookPages(book.transcript,book.title);pageIndex=0;$("readerTitle").textContent=book.title||"Mi historia";const cover=$("coverPreview");cover.className="reader-cover "+coverClass(book.coverTone||0);cover.style.backgroundImage=book.coverImage?"linear-gradient(180deg,rgba(5,18,40,.12),rgba(5,18,40,.72)),url("+JSON.stringify(book.coverImage)+")":"";cover.style.backgroundSize=book.coverImage?"cover":"";cover.style.backgroundPosition=book.coverImage?"center":"";renderPage();$("retryCover").classList.toggle("hidden",Boolean(book.coverImage));show("reader");}
+function openBook(book){stopAudiobook(false);activeBook=book;bookPages=Array.isArray(book.pages)&&book.pages.length?book.pages:makeBookPages(book.transcript,book.title);pageIndex=0;$("readerTitle").textContent=book.title||"Mi historia";const cover=$("coverPreview");cover.className="reader-cover "+coverClass(book.coverTone||0)+(book.coverImage?"":" reader-typographic-cover");cover.style.backgroundImage=book.coverImage?"linear-gradient(180deg,rgba(5,18,40,.12),rgba(5,18,40,.72)),url("+JSON.stringify(book.coverImage)+")":"";cover.style.backgroundSize=book.coverImage?"cover":"";cover.style.backgroundPosition=book.coverImage?"center":"";cover.querySelector("p").textContent=book.subtitle||"Una historia contada con tu voz";$("retryCover").classList.add("hidden");renderPage();show("reader");}
 function renderPage(){const page=bookPages[pageIndex]||bookPages[0]||{heading:"Mi historia",body:""};$("pageHeading").textContent=page.heading;$("pageText").textContent=page.body;let label="TU HISTORIA";if(page.section==="summary"||/^resumen$/i.test(page.heading||""))label="RESUMEN";else if(page.section==="prologue"||/^prólogo$/i.test(page.heading||""))label="PRÓLOGO";else if(page.section==="chapter"){let chapterNumber=0;for(let i=0;i<=pageIndex;i++){const item=bookPages[i];if(item&&item.section==="chapter"&&!/\(continuación\)$/i.test(item.heading||""))chapterNumber++;}label="CAPÍTULO "+Math.max(1,chapterNumber);}else if(pageIndex>0)label="CONTENIDO";$("pageLabel").textContent=label;$("bookRunningTitle").textContent=activeBook.title||"Mi historia";$("pageFooterTitle").textContent=activeBook.title||"Mi historia";$("pageNumber").textContent=String(pageIndex+1);const image=$("pageImage");if(page.image){image.src=page.image;image.classList.remove("hidden");}else{image.removeAttribute("src");image.classList.add("hidden");}$("pageCount").textContent=(pageIndex+1)+" / "+bookPages.length;$("prevPage").disabled=pageIndex===0;$("nextPage").disabled=pageIndex>=bookPages.length-1;}
 $("readerBack").addEventListener("click",function(){stopAudiobook(false);show("library");});
 function buildShareText(book){const title=book.title||"Mi libro";const pages=Array.isArray(book.pages)?book.pages:[];const body=pages.map(function(page){return (page.heading?String(page.heading)+"\n":"")+String(page.body||"");}).filter(Boolean).join("\n\n");return title+"\n\n"+(book.subtitle?book.subtitle+"\n\n":"")+"Creado con LIVRA · Tu voz. Tu historia. Tu libro.\n\n"+body;}
 $("shareBook").addEventListener("click",async function(){if(!activeBook)return;const button=$("shareBook");button.disabled=true;button.textContent="PREPARANDO…";try{const title=activeBook.title||"Mi libro";const content=buildShareText(activeBook);if(window.LIVRAAndroidSpeech&&typeof window.LIVRAAndroidSpeech.shareBook==="function"){window.LIVRAAndroidSpeech.shareBook(title,content);toast("Elegí WhatsApp, correo, Telegram u otra aplicación para compartir tu libro.");}else if(navigator.share){await navigator.share({title:title,text:content});}else if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(content);toast("Texto del libro copiado. Ya podés compartirlo.");}else{throw new Error("Este dispositivo no ofrece opciones para compartir.");}}catch(error){if(error&&error.name!=="AbortError")toast("No se pudo compartir el libro en este dispositivo.");}finally{button.disabled=false;button.textContent="↗ COMPARTIR LIBRO";}});
 
-$("retryCover").addEventListener("click",async function(){if(!activeBook)return;const button=$("retryCover");button.disabled=true;button.textContent="GENERANDO TAPA…";try{const brief=[activeBook.subtitle,activeBook.summary,activeBook.prologue,(activeBook.pages||[]).filter(function(page){return page.section==="chapter";}).slice(0,3).map(function(page){return page.body;}).join("\n\n")].filter(Boolean).join("\n\n");const imageData=await generateAICover(activeBook.title,brief||activeBook.transcript||"");activeBook.coverImage=imageData;activeBook.coverVersion=46;await putItem("books",activeBook);const cover=$("coverPreview");cover.style.backgroundImage="linear-gradient(180deg,rgba(5,18,40,.12),rgba(5,18,40,.72)),url("+JSON.stringify(imageData)+")";cover.style.backgroundSize="cover";cover.style.backgroundPosition="center";button.classList.add("hidden");renderLibrary();toast("¡La tapa del libro ya está lista!");}catch(error){toast("No se pudo generar la tapa. El libro sigue guardado y podés volver a intentarlo.");}finally{button.disabled=false;button.textContent="🎨 GENERAR TAPA DEL LIBRO";}});
+$("retryCover").classList.add("hidden");
 
 
 $("prevPage").addEventListener("click",function(){if(pageIndex>0){pageIndex--;renderPage();}});
@@ -206,37 +201,6 @@ $("listenBook").addEventListener("click",function(){if(audiobookPlaying){audiobo
 $("stopAudiobook").addEventListener("click",function(){stopAudiobook(true);});
 
 window.addEventListener("pagehide",function(){stopTimer();stopRecognition();releaseStream();stopPreview();});
-
-/* LIVRA 4.6 — versioned photographic and AI-generated covers */
-const renderLibraryWithoutCoverRecovery=renderLibrary;
-let livraCoverRecoveryRunning=false;
-async function recoverMissingBookCovers(){
- if(livraCoverRecoveryRunning)return;
- livraCoverRecoveryRunning=true;
- try{
-  const saved=await getAll("books");
-  const missing=saved.filter(function(book){return !book.coverImage;});
-  for(const book of missing){
-   const brief=[book.subtitle,book.summary,book.prologue,(book.pages||[]).filter(function(page){return page.section==="chapter";}).slice(0,3).map(function(page){return page.body;}).join("\n\n"),book.transcript].filter(Boolean).join("\n\n").slice(0,1800);
-   if(!brief)continue;
-   try{
-    const imageData=await generateAICover(book.title||"Mi historia",brief);
-    book.coverImage=imageData;
-    await putItem("books",book);
-    renderLibraryWithoutCoverRecovery();
-   }catch(error){
-    console.warn("LIVRA: no se pudo recuperar la tapa de",book.title,error);
-    break;
-   }
-  }
- }catch(error){console.warn("LIVRA: no se pudieron revisar las tapas pendientes",error);}
- finally{livraCoverRecoveryRunning=false;}
-}
-renderLibrary=function(){
- renderLibraryWithoutCoverRecovery();
- recoverMissingBookCovers();
-};
-/* Fin de recuperación automática de portadas */
 
 // LIVRA 3.3: start with two clear choices; the library is one tap away.
 show("home");

@@ -15,39 +15,7 @@ export default {
       return Response.json({ ok: true, service: "LIVRA transcription", model: "@cf/openai/whisper", configured: Boolean(env.AI) }, { headers: cors });
     }
     if (request.method === "POST" && url.pathname === "/cover") {
-      if (!env.AI) return Response.json({ error: "Workers AI binding is not configured." }, { status: 503, headers: cors });
-      try {
-        const payload = await request.json();
-        const title = String(payload && payload.title || "Mi historia").trim().slice(0, 160);
-        const source = String(payload && payload.text || "").trim().slice(0, 1800);
-        if (!source) return Response.json({ error: "Book text is required." }, { status: 400, headers: cors });
-        const prompt = [
-          "Create a premium, emotionally resonant FRONT-COVER ILLUSTRATION for a real book that will be sold in bookstores.",
-          "Book title (for visual inspiration only; do not write it): " + title,
-          "Edited book essence: " + source,
-          "Understand the actual subject, people, place, atmosphere and emotional heart of this edited book. Build one memorable visual scene or poetic metaphor that clearly belongs to THIS story, never a generic stock image.",
-          "Art direction: sophisticated literary publishing, beautiful painterly editorial illustration with realistic details, cinematic natural light, strong visual composition, rich but tasteful colors, subtle texture, professional art direction.",
-          "Composition: vertical portrait 2:3 book-cover artwork, one dominant focal subject, elegant depth, calm negative space near the upper and lower thirds for title and author placement later. Fill the canvas edge to edge.",
-          "Do not include text, letters, numbers, typography, title, author name, logo, border, frame, book mockup, hands holding a book, or watermark.",
-          "The result must feel specific, moving, polished and worthy of a professionally edited book."
-        ].join("\n\n");
-        const result = await env.AI.run("@cf/black-forest-labs/flux-1-schnell", { prompt });
-        let imageBytes;
-        if (result instanceof Uint8Array) {
-          imageBytes = result;
-        } else if (result && result.image instanceof Uint8Array) {
-          imageBytes = result.image;
-        } else if (result && typeof result.image === "string") {
-          const binary = atob(result.image);
-          imageBytes = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) imageBytes[i] = binary.charCodeAt(i);
-        } else {
-          throw new Error("AI image response was empty or unsupported");
-        }
-        return new Response(imageBytes, { status: 200, headers: { ...cors, "Content-Type": "image/png", "Cache-Control": "no-store" } });
-      } catch (error) {
-        return Response.json({ error: "No se pudo generar la tapa con IA." }, { status: 502, headers: cors });
-      }
+      return Response.json({ error: "La generación de imágenes está desactivada en LIVRA 4.9.3 Text Edition." }, { status: 410, headers: cors });
     }
     if (request.method === "POST" && url.pathname === "/compose") {
       if (!env.AI) return Response.json({ error: "Workers AI binding is not configured." }, { status: 503, headers: cors });
@@ -110,14 +78,14 @@ export default {
           return { title: title.slice(0, 180), subtitle: subtitle.slice(0, 240), summary, prologue, chapters };
         };
         const runEditor = async (messages, maxTokens) => {
-          const result = await env.AI.run(model, {
-            messages,
-            max_tokens: maxTokens,
-            temperature: 0.55,
-            top_p: 0.9,
-            repetition_penalty: 1.08
-          });
-          return String(result && result.response || "").trim();
+          let timer;
+          try {
+            const result = await Promise.race([
+              env.AI.run(model, { messages, max_tokens: maxTokens, temperature: 0.55, top_p: 0.9, repetition_penalty: 1.08 }),
+              new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("Workers AI superó el límite de 40 segundos.")), 40000); })
+            ]);
+            return String(result && (result.response || result.result && result.result.response) || "").trim();
+          } finally { if (timer) clearTimeout(timer); }
         };
         let book;
         let firstError = "";
@@ -145,7 +113,7 @@ export default {
         }
         return Response.json({ ...book, model, repaired: Boolean(firstError) }, { headers: cors });
       } catch (error) {
-        return Response.json({ error: "No se pudo editar el libro con IA. Probá otra vez; tu grabación original sigue guardada." }, { status: 502, headers: cors });
+        return Response.json({ error: String(error && error.message || "No se pudo editar el libro con IA. Tu grabación original sigue guardada.").slice(0, 240) }, { status: 502, headers: cors });
       }
     }
     if (request.method !== "POST" || url.pathname !== "/transcribe") {
@@ -164,7 +132,7 @@ export default {
       let binary = "";
       const batch = 0x8000;
       for (let i = 0; i < bytes.length; i += batch) binary += String.fromCharCode(...bytes.subarray(i, i + batch));
-      const result = await env.AI.run("@cf/openai/whisper", { audio: btoa(binary) });
+      let timer;let result;try{result=await Promise.race([env.AI.run("@cf/openai/whisper",{audio:btoa(binary)}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("Whisper superó el límite de 40 segundos.")),40000);})]);}finally{if(timer)clearTimeout(timer);}
       const transcript = (result && typeof result.text === "string" ? result.text : "").trim();
       if (!transcript) return Response.json({ error: "No speech was detected. Try a clearer or longer recording." }, { status: 422, headers: cors });
       return Response.json({ text: transcript, model: "@cf/openai/whisper" }, { headers: cors });
