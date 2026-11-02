@@ -117,6 +117,7 @@ function renderLibrary(){
  getAll("books").then(function(items){
   books=items.sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt);});
   const root=$("bookGrid");
+  const savedScrollTop=root.scrollTop;
   root.replaceChildren();
   root.classList.remove("hidden");
   root.classList.toggle("is-empty",books.length===0);
@@ -135,6 +136,8 @@ function renderLibrary(){
     poster.className="book-cover-photo";
     poster.src=book.coverImage;
     poster.alt="Portada de "+(book.title||"Mi historia");
+    poster.loading="lazy";
+    poster.decoding="async";
     cover.append(poster);
    }
    const shade=document.createElement("div"); shade.className="book-cover-shade";
@@ -168,6 +171,7 @@ function renderLibrary(){
    placeholder.addEventListener("click",requestMicThenRecord);
    root.append(placeholder);
   }
+  root.scrollTop=savedScrollTop;
  }).catch(function(){toast("No se pudo cargar la biblioteca.");});
 }
 function previewBook(book){
