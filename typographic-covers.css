@@ -1,0 +1,19 @@
+/* LIVRA 4.9.3 — premium text-only covers; legacy photo cover records remain supported. */
+#library .book-cover-typographic{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:space-between!important;padding:clamp(7px,2vw,12px)!important;text-align:center!important;isolation:isolate;background:linear-gradient(150deg,#173b53 0%,#0b2237 58%,#071729 100%)!important;border:1px solid rgba(222,188,123,.78)!important}
+#library .book-cover-typographic.cover-tone-2{background:linear-gradient(150deg,#513047,#321d32 60%,#1c1427)!important}
+#library .book-cover-typographic.cover-tone-3{background:linear-gradient(150deg,#24534c,#12352f 60%,#0b211f)!important}
+#library .book-cover-typographic.cover-tone-4{background:linear-gradient(150deg,#4a3040,#302032 60%,#1b1425)!important}
+#library .book-cover-typographic.cover-tone-5{background:linear-gradient(150deg,#45506a,#252e49 60%,#101a31)!important}
+#library .book-cover-kicker{font-size:clamp(6px,1.65vw,9px);letter-spacing:.2em;color:#e7c98f;font-weight:800}
+#library .book-cover-ornament{color:#d9b56d;font-size:clamp(13px,3vw,19px);line-height:1}
+#library .book-cover-typographic .book-cover-title{position:static!important;display:-webkit-box!important;width:100%;padding:0!important;margin:auto 0!important;color:#fff3d8!important;font-family:Georgia,'Times New Roman',serif!important;font-size:clamp(12px,3.15vw,19px)!important;line-height:1.12!important;text-shadow:0 2px 7px rgba(0,0,0,.55);overflow-wrap:anywhere;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+#library .book-cover-subtitle{font-size:clamp(7px,1.8vw,10px);line-height:1.2;color:#e8dcc3;max-height:3.6em;overflow:hidden}
+#library .book-cover-typographic .book-cover-meta{position:static!important;color:#d6bd8b!important;font-size:clamp(6px,1.55vw,8px)!important;letter-spacing:.08em}
+#bookPreviewArtwork.typographic-preview{display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;text-align:center;background:linear-gradient(145deg,#173b53,#071729)!important;border:1px solid #d9b56d;padding:24px;box-sizing:border-box;color:#fff3d8}
+#bookPreviewArtwork.typographic-preview>strong{font:700 clamp(26px,7vw,42px)/1.12 Georgia,'Times New Roman',serif;max-width:90%;overflow-wrap:anywhere}
+#bookPreviewArtwork.typographic-preview>span:last-child{font-size:14px;color:#e8dcc3}
+#bookPreviewArtwork.typographic-preview .book-cover-kicker{letter-spacing:.2em;color:#e7c98f}
+#bookPreviewArtwork.typographic-preview .book-cover-ornament{color:#d9b56d;font-size:28px}
+#reader .reader-typographic-cover{background:linear-gradient(145deg,#173b53,#071729)!important;border:1px solid #d9b56d}
+#reader .reader-typographic-cover h2{font-family:Georgia,'Times New Roman',serif;color:#fff3d8}
+#reader .reader-typographic-cover p{color:#e8dcc3}
