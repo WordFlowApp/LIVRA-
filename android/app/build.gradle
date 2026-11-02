@@ -1,4 +1,4 @@
-// LIVRA Android wrapper — release candidate 4.6.
+// LIVRA Android wrapper — text edition 4.9.3.
 plugins {
     id 'com.android.application'
 }
@@ -11,8 +11,8 @@ android {
         applicationId 'com.livra.app'
         minSdk 26
         targetSdk 35
-        versionCode 16
-        versionName '4.9.2'
+        versionCode 17
+        versionName '4.9.3'
     }
 
     compileOptions {
