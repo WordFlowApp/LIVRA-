@@ -115,7 +115,7 @@ $("buildBook").addEventListener("click",async function(){
   const book={type:"book",title:composed.title||requestedTitle,subtitle:composed.subtitle||"",createdAt:new Date().toISOString(),audioIds:chosen.map(function(item){return item.id;}),transcript:transcript,summary:composed.summary||"",prologue:composed.prologue||"",pages:Array.isArray(composed.pages)?composed.pages:[],coverImage:null,coverStyle:"typographic",coverVersion:493,coverTone:Math.floor(Math.random()*5),localDraft:Boolean(composed.localDraft),draftReason:composed.draftReason||"",authorName:"Tu historia"};
   book.id=await addItem("books",book);const persisted=await getAll("books");
   if(!persisted.some(function(saved){return String(saved.id)===String(book.id);}))throw new Error("No pudimos confirmar el guardado del libro. Tus grabaciones originales siguen intactas.");
-  selectedAudioIds.clear();show("library");renderLibrary();
+  selectedAudioIds.clear();show("library");
   toast(book.localDraft?"Guardamos una edición inicial con tu texto original. Podés completar la edición literaria más adelante.":"¡Tu libro está creado y guardado en la biblioteca!");
  }catch(err){console.error("LIVRA build book:",err);toast((err&&err.message?err.message:"No se pudo guardar el libro.")+" Tus grabaciones originales siguen guardadas.");}
  finally{buildingBook=false;button.innerHTML='<span class="button-icon">▤</span> ARMAR LIBRO';button.disabled=selectedAudioIds.size===0;}
