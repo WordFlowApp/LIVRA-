@@ -168,9 +168,9 @@ public class MainActivity extends Activity {
                     int n = livraAudioRecord.read(buf, 0, buf.length);
                     if (n > 0) {
                         synchronized (livraPcm) { livraPcm.write(buf, 0, n); }
-                        try { if (livraRecoveryStream != null) { livraRecoveryStream.write(buf, 0, n); livraRecoveryStream.flush(); } } catch (IOException fileError) { sendToPage("recordingError", "No se pudo proteger el archivo temporal de audio."); livraRecording.set(false); break; }
+                        try { if (livraRecoveryStream != null) { livraRecoveryStream.write(buf, 0, n); livraRecoveryStream.flush(); } } catch (IOException fileError) { sendToPage("recordingError", "No se pudo proteger el archivo temporal de audio. Se conservará el archivo parcial."); handler.post(() -> finishLivraRecording()); break; }
                         try { livraSpeechPipe.write(buf, 0, n); livraSpeechPipe.flush(); } catch (IOException closedPipe) { /* Keep saving audio. */ }
-                    } else if (n < 0 && livraRecording.get()) { sendToPage("recordingError", "Error leyendo el micrófono."); break; }
+                    } else if (n < 0 && livraRecording.get()) { sendToPage("recordingError", "Error leyendo el micrófono. Se finalizará la grabación parcial."); handler.post(() -> finishLivraRecording()); break; }
                 }
             }, "LIVRA-AudioCapture");
             livraCaptureThread.start();
@@ -218,7 +218,8 @@ public class MainActivity extends Activity {
     private void finishLivraRecording() {
         if (!livraRecording.getAndSet(false)) return;
         try { if (livraAudioRecord != null) livraAudioRecord.stop(); } catch (Exception ignored) {}
-        try { if (livraCaptureThread != null) livraCaptureThread.join(1200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        try { if (livraCaptureThread != null) livraCaptureThread.join(5000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        if (livraCaptureThread != null && livraCaptureThread.isAlive()) { sendToPage("recordingError", "El micrófono todavía está cerrando. El audio temporal se conserva; volvé a intentar detenerlo."); return; }
         try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {}
         if (recognizer != null) { try { recognizer.stopListening(); } catch (Exception ignored) {} handler.postDelayed(() -> { if (recognizer != null) { recognizer.destroy(); recognizer = null; } }, 1600); }
         closeRecoveryStream();
@@ -227,7 +228,7 @@ public class MainActivity extends Activity {
         byte[] wav = livraMakeWav(pcm);
         cleanupLivraAudio();
         int chunkSize = 24000, total = (wav.length + chunkSize - 1) / chunkSize;
-        sendToPage("audioStart", total + "||" + Math.max(0, pcm.length / (LIVRA_SAMPLE_RATE * 2)));
+        sendToPage("audioStart", total + "|pending|" + Math.max(0, pcm.length / (LIVRA_SAMPLE_RATE * 2)));
         for (int p = 0; p < total; p++) {
             int start = p * chunkSize, len = Math.min(chunkSize, wav.length - start);
             byte[] chunk = new byte[len]; System.arraycopy(wav, start, chunk, 0, len);
@@ -259,7 +260,24 @@ public class MainActivity extends Activity {
         } catch (Exception error) { sendToPage("recordingError", "No se pudo recuperar el audio pendiente. El archivo original se conservó."); }
     }
     private void acknowledgePendingRecovery(String id) { if (!"pending".equals(id)) return; File file = new File(getFilesDir(), LIVRA_RECOVERY_FILE); if (file.exists() && !file.delete()) Toast.makeText(this, "El audio ya está guardado; no se pudo limpiar el temporal.", Toast.LENGTH_LONG).show(); }
-    private void discardPendingRecovery() { if (livraRecording.get()) finishLivraRecording(); File file = new File(getFilesDir(), LIVRA_RECOVERY_FILE); if (file.exists()) file.delete(); }
+    private void discardPendingRecovery() {
+        // Explicit cancel: stop capture and delete the temporary file without emitting audioEnd,
+        // so JavaScript cannot accidentally turn a cancelled recording into a saveable Blob.
+        livraRecording.set(false);
+        try { if (livraAudioRecord != null) livraAudioRecord.stop(); } catch (Exception ignored) {}
+        try { if (livraCaptureThread != null) livraCaptureThread.join(5000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        if (livraCaptureThread != null && livraCaptureThread.isAlive()) {
+            sendToPage("recordingError", "No se pudo detener el micrófono todavía. El audio temporal se conserva por seguridad.");
+            return;
+        }
+        try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {}
+        if (recognizer != null) { try { recognizer.stopListening(); recognizer.destroy(); } catch (Exception ignored) {} recognizer = null; }
+        closeRecoveryStream();
+        cleanupLivraAudio();
+        livraPcm = null;
+        File file = new File(getFilesDir(), LIVRA_RECOVERY_FILE);
+        if (file.exists() && !file.delete()) sendToPage("recordingError", "No se pudo eliminar el audio cancelado.");
+    }
     private void cleanupLivraAudio() {
         if (livraAudioRecord != null) { try { livraAudioRecord.release(); } catch (Exception ignored) {} livraAudioRecord = null; }
         try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {} livraSpeechPipe = null;
