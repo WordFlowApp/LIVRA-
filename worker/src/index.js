@@ -14,7 +14,10 @@ export default {
     if (request.method === "GET" && url.pathname === "/health") {
       return Response.json({ ok: true, service: "LIVRA transcription", model: "@cf/openai/whisper", configured: Boolean(env.AI) }, { headers: cors });
     }
-    if (request.method === "POST" && url.pathname === "/cover") {\n      return Response.json({ error: "La generación de imágenes está desactivada en LIVRA 4.9.3 Text Edition." }, { status: 410, headers: cors });\n    }\n    if (request.method === "POST" && url.pathname === "/compose") {
+    if (request.method === "POST" && url.pathname === "/cover") {
+      return Response.json({ error: "La generación de imágenes está desactivada en LIVRA 4.9.3 Text Edition." }, { status: 410, headers: cors });
+    }
+    if (request.method === "POST" && url.pathname === "/compose") {
       if (!env.AI) return Response.json({ error: "Workers AI binding is not configured." }, { status: 503, headers: cors });
       try {
         const payload = await request.json();
