@@ -44,14 +44,15 @@ jobs:
           assert.match(app, /coverStyle:"typographic"/);
           assert.match(app, /await getAll\("books"\)/);
           assert.doesNotMatch(app, /recoverMissingBookCovers|generateAICover|\/cover/);
-          assert.doesNotMatch(html, /book-visuals\.js|book-visuals\.css/);
+          assert.doesNotMatch(html, /book-visuals\\.js|book-visuals\\.css/);
+          assert.match(html, /LIVRA 4\\.9\\.4/);
           assert.match(worker, /status: 410/);
           assert.match(worker, /superó el límite de 40 segundos/);
           assert.match(coverCss, /book-cover-typographic/);
-          assert.match(gridCss, /grid-template-columns:\s*repeat\(3/);
-          assert.match(gradle, /versionName '4\.9\.3'/);
-          assert.match(gradle, /versionCode 17/);
-          console.log('LIVRA 4.9.3 static checks passed.');
+          assert.match(gridCss, /grid-template-columns:\\s*repeat\\(3/);
+          assert.match(gradle, /versionName '4\\.9\\.4'/);
+          assert.match(gradle, /versionCode 18/);
+          console.log('LIVRA 4.9.4 static checks passed.');
           NODE
       - name: Build debug APK
         run: gradle -p android assembleDebug
@@ -65,7 +66,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LIVRA-4.9.3-TEXT-EDITION-debug-apk
+          name: LIVRA-4.9.4-TEXT-EDITION-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
