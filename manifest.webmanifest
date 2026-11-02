@@ -1,10 +1,10 @@
 {
   "id": "./",
-  "name": "LIVRA — Tu voz, tu libro",
+  "name": "LIVRA 4.9.3 — Text Edition",
   "short_name": "LIVRA",
   "description": "Grabá tus historias y convertí tus palabras en libros.",
   "lang": "es-AR",
-  "start_url": "./?v=18",
+  "start_url": "./?v=19",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
