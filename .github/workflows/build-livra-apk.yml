@@ -23,8 +23,51 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Validate JavaScript and text-only book flow
+        run: |
+          node --check app.js
+          node --check worker/src/index.js
+          node --check sw.js
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import assert from 'node:assert/strict';
+          const app = readFileSync('app.js', 'utf8');
+          const html = readFileSync('index.html', 'utf8');
+          const worker = readFileSync('worker/src/index.js', 'utf8');
+          const coverCss = readFileSync('typographic-covers.css', 'utf8');
+          const gridCss = readFileSync('library-grid.css', 'utf8');
+          const gradle = readFileSync('android/app/build.gradle', 'utf8');
+          assert.match(app, /localDraftFromTranscript/);
+          assert.match(app, /buildingBook/);
+          assert.match(app, /coverStyle:"typographic"/);
+          assert.match(app, /await getAll\("books"\)/);
+          assert.doesNotMatch(app, /recoverMissingBookCovers|generateAICover|\/cover/);
+          assert.doesNotMatch(html, /book-visuals\.js|book-visuals\.css/);
+          assert.match(worker, /status: 410/);
+          assert.match(worker, /superó el límite de 40 segundos/);
+          assert.match(coverCss, /book-cover-typographic/);
+          assert.match(gridCss, /grid-template-columns:\s*repeat\(3/);
+          assert.match(gradle, /versionName '4\.9\.3'/);
+          assert.match(gradle, /versionCode 17/);
+          console.log('LIVRA 4.9.3 static checks passed.');
+          NODE
       - name: Build debug APK
         run: gradle -p android assembleDebug
+      - name: Verify Android APK package
+        run: |
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          unzip -t "$APK"
+          unzip -Z1 "$APK" | grep -qx 'AndroidManifest.xml'
+          unzip -Z1 "$APK" | grep -q '^classes.*\.dex
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LIVRA-4.9.3-TEXT-EDITION-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
