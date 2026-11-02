@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#071b3d">
 <meta name="description" content="LIVRA transforma tu voz en libros.">
-<link rel="manifest" href="./manifest.webmanifest?v=20">
-<link rel="icon" href="./icons/livra.svg?v=20" type="image/svg+xml">
+<link rel="manifest" href="./manifest.webmanifest?v=21">
+<link rel="icon" href="./icons/livra.svg?v=21" type="image/svg+xml">
 <link rel="stylesheet" href="./styles.css?v=59">
-<link rel="stylesheet" href="./library-grid.css?v=1">
-<link rel="stylesheet" href="./typographic-covers.css?v=1">
-<title>LIVRA 4.9.3 — Text Edition</title>
+<link rel="stylesheet" href="./library-grid.css?v=2">
+<link rel="stylesheet" href="./typographic-covers.css?v=2">
+<title>LIVRA 4.9.4 — Text Edition</title>
 </head>
 <body>
 <header class="topbar"><div class="topbar-brand"><span class="brand-mark" aria-hidden="true">L</span><strong>LIVRA</strong></div><button id="globalMenuButton" class="global-menu-button" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button><nav id="globalMenu" class="global-menu hidden" aria-label="Navegación principal"><button type="button" data-screen="home">Inicio</button><button type="button" data-screen="recording">Contar historia</button><button type="button" data-screen="audioFiles">Mis grabaciones</button><button type="button" data-screen="library">Biblioteca / Mis libros</button><button type="button" data-screen="library">Publicar / exportar</button></nav></header>
@@ -20,7 +20,6 @@
   <button id="startRecording" class="big-button record-home"><span class="button-icon">🎙</span> GRABAR</button>
   <button id="openLibrary" class="big-button library-home"><span class="button-icon">▤</span> MI BIBLIOTECA</button>
 </section>
-
 <section id="recording" class="screen">
   <div class="screen-heading"><h1>Contá tu historia</h1></div>
   <p class="minimum-duration">Duración mínima: 2 minutos</p>
@@ -30,58 +29,31 @@
   <div id="waveform" class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <label class="field-label" for="transcriptEdit">Texto de tu historia</label>
   <textarea id="transcriptEdit" class="transcript-edit" placeholder="Tu texto aparecerá acá mientras hablás. También podés escribirlo." rows="3"></textarea>
-  <div class="record-controls">
-    <button id="pauseRecording" class="control-button pause" disabled><span>Ⅱ</span> PAUSA</button>
-    <button id="stopRecording" class="control-button stop" disabled><span>■</span> STOP</button>
-    <button id="saveRecording" class="control-button save" disabled><span>✓</span> GUARDAR</button>
-  </div>
+  <div class="record-controls"><button id="pauseRecording" class="control-button pause" disabled><span>Ⅱ</span> PAUSA</button><button id="stopRecording" class="control-button stop" disabled><span>■</span> STOP</button><button id="saveRecording" class="control-button save" disabled><span>✓</span> GUARDAR</button></div>
   <button id="cancelRecording" class="quiet-button">Cancelar y volver</button>
 </section>
-
 <section id="audioFiles" class="screen">
-  <div class="screen-heading"><h1>Archivos de audio</h1><img class="mini-icon" src="./icons/livra.svg?v=19" alt="LIVRA"></div>
+  <div class="screen-heading"><h1>Archivos de audio</h1><img class="mini-icon" src="./icons/livra.svg?v=20" alt="LIVRA"></div>
   <p class="subtitle">Elegí las historias que querés convertir en libro.</p>
-  <div id="recordingList" class="audio-list"></div>
-  <div id="selectionStatus" class="selection-status">0 grabaciones seleccionadas</div>
-  <button id="buildBook" class="big-button build-button"><span class="button-icon">▤</span> ARMAR LIBRO</button>
-  <button id="audioBackHome" class="quiet-button">Volver al inicio</button>
+  <div id="recordingList" class="audio-list"></div><div id="selectionStatus" class="selection-status">0 grabaciones seleccionadas</div>
+  <button id="buildBook" class="big-button build-button"><span class="button-icon">▤</span> ARMAR LIBRO</button><button id="audioBackHome" class="quiet-button">Volver al inicio</button>
 </section>
-
 <section id="library" class="screen">
   <div class="library-brand-heading"><div class="library-brand-lockup"><div><h1>Mi biblioteca</h1><p id="librarySubtitle" class="subtitle">Tus historias. Tus libros. Tus logros.</p></div></div><span class="library-brand-tag">LIVRA ORIGINALS</span></div>
   <div id="bookGrid" class="book-grid"></div>
   <div id="emptyLibrary" class="empty-state"><div class="empty-book">▤</div><h2>Tu primer libro empieza con tu voz</h2><p>Esta estantería está lista para tu primera historia.</p><div class="empty-shelf" aria-hidden="true"><span></span><span></span><span></span></div></div>
   <button id="publishAmazon" class="quiet-button amazon-button" aria-label="Abrir la sección de libros de Amazon"><span class="amazon-brand" aria-hidden="true">amazon<svg viewBox="0 0 100 24" role="presentation"><path d="M8 6 C28 23 68 23 88 5" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M78 5 L89 4 L86 15" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>PUBLICAR TU LIBRO</span></button>
-  <button id="libraryRecord" class="big-button record-home"><span class="button-icon">🎙</span> GRABAR</button>
-  <button id="libraryHome" class="quiet-button">Volver al inicio</button>
+  <button id="libraryRecord" class="big-button record-home"><span class="button-icon">🎙</span> GRABAR</button><button id="libraryHome" class="quiet-button">Volver al inicio</button>
 </section>
-
 <section id="bookPreview" class="screen book-preview-screen">
-  <button id="previewBack" class="quiet-button preview-back">← VOLVER A LA BIBLIOTECA</button>
-  <div id="bookPreviewArtwork" class="book-preview-artwork"></div>
-  <div class="book-preview-details"><h1 id="bookPreviewTitle">Mi historia</h1><p id="bookPreviewAuthor">Tu historia</p><p id="bookPreviewDate"></p></div>
-  <button id="previewReadBook" class="big-button build-button">📖 READ BOOK</button>
+  <button id="previewBack" class="quiet-button preview-back">← VOLVER A LA BIBLIOTECA</button><div id="bookPreviewArtwork" class="book-preview-artwork"></div><div class="book-preview-details"><h1 id="bookPreviewTitle">Mi historia</h1><p id="bookPreviewAuthor">Tu historia</p><p id="bookPreviewDate"></p></div><button id="previewReadBook" class="big-button build-button">📖 READ BOOK</button>
 </section>
-
 <section id="reader" class="screen">
   <div class="reader-toolbar"><button id="readerBack" class="reader-tool" aria-label="Volver a biblioteca">‹ <span>Biblioteca</span></button><span class="reader-brand">LIVRA BOOKS</span><button id="shareBook" class="reader-tool reader-share" aria-label="Compartir libro">↗</button></div>
-  <div id="coverPreview" class="reader-cover"><img src="./icons/livra.svg?v=19" alt=""><h2 id="readerTitle">Mi historia</h2><p>Una historia contada con tu voz</p></div>
-  <article class="reader-page">
-    <div class="book-running-title" id="bookRunningTitle">Mi historia</div>
-    <div class="book-page-frame">
-      <div id="pageLabel" class="page-label">TU HISTORIA</div>
-      <h2 id="pageHeading">Mi historia</h2>
-      <img id="pageImage" class="page-image hidden" alt="Ilustración de esta página">
-      <p id="pageText">Tu libro aparecerá acá.</p>
-      <div class="book-page-footer"><span id="pageFooterTitle">Mi historia</span><span id="pageNumber">1</span></div>
-    </div>
-  </article>
-  <div class="reader-navigation"><button id="prevPage" class="control-button pause">← ANTERIOR</button><span id="pageCount">1 / 1</span><button id="nextPage" class="control-button pause">SIGUIENTE →</button></div>
-  <div class="reader-bottom-tools"><button id="readBook" class="reader-tool reader-mode">📖 Leer</button><button id="listenBook" class="reader-tool reader-audio">🎧 Escuchar</button><button id="stopAudiobook" class="reader-tool audiobook-stop hidden">■ Detener</button><button id="retryCover" class="reader-tool hidden">🎨 Tapa</button></div>
+  <div id="coverPreview" class="reader-cover"><img src="./icons/livra.svg?v=20" alt=""><h2 id="readerTitle">Mi historia</h2><p>Una historia contada con tu voz</p></div>
+  <article class="reader-page"><div class="book-running-title" id="bookRunningTitle">Mi historia</div><div class="book-page-frame"><div id="pageLabel" class="page-label">TU HISTORIA</div><h2 id="pageHeading">Mi historia</h2><img id="pageImage" class="page-image hidden" alt="Ilustración de esta página"><p id="pageText">Tu libro aparecerá acá.</p><div class="book-page-footer"><span id="pageFooterTitle">Mi historia</span><span id="pageNumber">1</span></div></div></article>
+  <div class="reader-navigation"><button id="prevPage" class="control-button pause">← ANTERIOR</button><span id="pageCount">1 / 1</span><button id="nextPage" class="control-button pause">SIGUIENTE →</button></div><div class="reader-bottom-tools"><button id="readBook" class="reader-tool reader-mode">📖 Leer</button><button id="listenBook" class="reader-tool reader-audio">🎧 Escuchar</button><button id="stopAudiobook" class="reader-tool audiobook-stop hidden">■ Detener</button><button id="retryCover" class="reader-tool hidden">🎨 Tapa</button></div>
 </section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-</main>
-<footer>Tu voz. Tu historia. Tu libro.</footer>
-<script src="./app.js?v=66"></script>
-
+</main><footer>Tu voz. Tu historia. Tu libro.</footer><script src="./app.js?v=67"></script>
 </body></html>
