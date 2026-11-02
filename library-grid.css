@@ -1,4 +1,4 @@
-/* LIVRA 4.9.2 — isolated library layout repair. Loaded last to neutralize legacy cascade conflicts. */
+/* LIVRA 4.9.3 — isolated library layout repair. Loaded last to neutralize legacy cascade conflicts. */
 #library.screen.active{
   display:flex!important;
   flex-direction:column!important;
