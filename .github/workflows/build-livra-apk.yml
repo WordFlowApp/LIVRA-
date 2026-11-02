@@ -59,15 +59,7 @@ jobs:
           test -s "$APK"
           unzip -t "$APK"
           unzip -Z1 "$APK" | grep -qx 'AndroidManifest.xml'
-          unzip -Z1 "$APK" | grep -q '^classes.*\.dex
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: LIVRA-4.9.3-TEXT-EDITION-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
-
+          unzip -Z1 "$APK" | grep -q 'classes.dex'
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
