@@ -17,3 +17,5 @@
 #reader .reader-typographic-cover{background:linear-gradient(145deg,#173b53,#071729)!important;border:1px solid #d9b56d}
 #reader .reader-typographic-cover h2{font-family:Georgia,'Times New Roman',serif;color:#fff3d8}
 #reader .reader-typographic-cover p{color:#e8dcc3}
+
+#reader .reader-typographic-cover img{display:none!important}
