@@ -1,4 +1,4 @@
-// LIVRA Android wrapper — text edition 4.9.4.
+// LIBRA VOZ Android release candidate 5.0.0.
 plugins {
     id 'com.android.application'
 }
@@ -9,10 +9,12 @@ android {
 
     defaultConfig {
         applicationId 'com.livra.app'
-        minSdk 26
+        // Native shared AudioRecord/SpeechRecognizer capture uses segmented audio-source APIs (Android 13+).
+        // Keep minSdk aligned with the runtime guard in MainActivity until a tested legacy capture path exists.
+        minSdk 33
         targetSdk 35
-        versionCode 18
-        versionName '4.9.4'
+        versionCode 20
+        versionName '5.0.2'
     }
 
     compileOptions {
