@@ -19,3 +19,12 @@
 .kdp-platform-card p{font-size:14px;line-height:1.5;margin:9px 0;color:#d0def1}
 .kdp-platform-card a{display:inline-block;color:#80dfff;font-size:14px;font-weight:800;margin:2px 0 8px;text-decoration:underline}
 .kdp-platform-card small{display:block;color:#ffd78a;font-size:12px;line-height:1.45;margin-top:6px}
+
+.kdp-quote{display:grid;gap:11px;background:#071a36;border:1px solid #45678e;border-radius:14px;padding:14px}
+.kdp-quote>div{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;color:#d7e5f7;font-size:14px}
+.kdp-quote strong{color:#fff;text-align:right}
+.kdp-quote .kdp-quote-total{border-top:1px solid #45678e;padding-top:12px;font-size:16px;font-weight:900}
+#kdpVoiceHelp{width:100%;min-height:52px;font-size:15px}
+.kdp-platforms .kdp-platform-card{min-height:unset}
+.kdp-screen input,.kdp-screen select,.kdp-screen textarea{font-size:16px;min-height:46px}
+.kdp-screen label{line-height:1.5}
