@@ -28,3 +28,12 @@
 .kdp-platforms .kdp-platform-card{min-height:unset}
 .kdp-screen input,.kdp-screen select,.kdp-screen textarea{font-size:16px;min-height:46px}
 .kdp-screen label{line-height:1.5}
+
+.kdp-plan-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:14px 0}
+.kdp-plan{background:#071a36;border:1px solid #45678e;border-radius:15px;padding:16px}
+.kdp-plan-name{display:block;color:#80dfff;font-size:12px;font-weight:900;letter-spacing:1.5px;margin-bottom:7px}
+.kdp-plan>strong{display:block;font-size:25px;color:#fff}
+.kdp-plan>strong small{font-size:13px;color:#c7d8f0;font-weight:600}
+.kdp-plan p{font-size:14px;margin:8px 0 0}
+.kdp-plans h3{font-size:18px;margin:18px 0 10px}
+@media(min-width:680px){.kdp-plan-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
