@@ -95,3 +95,34 @@ Record actual KDP royalty by marketplace, format and currency; refunds/reversals
 - No rights or AI declaration pre-checked.
 - Readiness says no KDP submission has occurred.
 - Android CI and physical-device selection/save/reload/navigation tests pass.
+## 8. Multi-platform distribution research (2026-11-08)
+
+### Important correction: no 400/500-copy KDP requirement
+Amazon KDP publishes print books on demand. KDP states that authors do not pay upfront printing costs or hold inventory; print cost is deducted from royalties when a customer orders. Proof/author copies are optional and charged at author/print cost plus shipping. LIBRA must not tell users they must buy 400 or 500 copies.
+Official references:
+- https://kdp.amazon.com/es_ES/help/topic/GHKDSCW2KQ3K4UU4
+- https://kdp.amazon.com/en_US/help/topic/G201834340
+- https://kdp.amazon.com/en_US/help/topic/G7BBN68RYX5UMDZF
+- https://kdp.amazon.com/en_US/help/topic/G2MYNEKHT443C2H2
+
+### Platforms evaluated
+- Amazon KDP: eBook, paperback and hardcover; print on demand; no mandatory author bulk purchase; optional proof/author copies at print cost plus shipping.
+- IngramSpark: print and eBook global distribution; current pricing page says account signup and title upload are free; print/ship costs and commercial discount/other current terms must be calculated per title.
+- Lulu: print on demand, no minimum/maximum order quantity; retail/global distribution currently lists a one-time non-refundable USD 4.99 first-submission review fee and requires an approved proof copy where applicable; process can take at least 12 weeks. Critical overlap restriction: Lulu says titles already listed on Amazon or another retail partner are not eligible for its Global Distribution. Do not promise simultaneous duplicate distribution through Lulu and KDP.
+- Kobo Writing Life: eBooks and audiobooks, no fee to distribute eBooks, non-exclusive; no print-on-demand service.
+- Apple Books: direct eBook publishing signup is free; selling requires tax and banking details.
+- Barnes & Noble Press: no platform publishing fee and print/eBook options, but currently available only to publishers in US, UK, Ireland, Canada, Australia, New Zealand, France, Italy, Germany, Spain, Netherlands and Belgium. Personal print orders ship only within the US; not presently available to Argentina-based publishers under the listed eligibility.
+- Draft2Digital: potential ebook aggregation partner; Amazon distribution is invitation-only. Do not show as a direct LIBRA connector until current fees, territory and eligibility are separately validated.
+
+### Multi-channel rules
+- Separate eBook distribution from print distribution; never assume each provider offers both.
+- KDP Select makes the enrolled eBook exclusive to Amazon for the enrollment period; do not simultaneously distribute that same eBook elsewhere while enrolled. Print editions can have separate channel decisions.
+- Avoid duplicate retailer feeds and conflicting ISBN/imprint metadata. Ask the author to choose direct vs aggregator distribution per retailer.
+- Before enabling any platform, show country eligibility, file formats, ISBN requirements, one-time review/setup fees, proof-copy requirements, print/ship cost, sales commission/royalty, payout threshold/schedule and exclusivity.
+- Display estimates only as estimates. Require explicit user acceptance of the exact charge before any paid proof, review or print order.
+- Platform requirements and fees change; store a verified-at date and link to official terms. Re-check before each submission.
+
+### Product implementation in Phase 1
+- Added a mobile platform comparison directory inside Mi Editorial with the above current findings and official links.
+- The directory is informational only; no account credentials are collected and no submission is made.
+- Future architecture should support a distribution plan per book, with distinct eBook channels and print channels, retailer feed ownership, ISBN allocation, exclusivity windows, fees accepted, proof approval, and submission status per platform.
