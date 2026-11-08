@@ -23,7 +23,9 @@
     rightsConfirmed:$("kdpRightsConfirmed").checked,
     aiText:$("kdpAiText").value,
     aiImages:$("kdpAiImages").value,
-    aiTranslations:$("kdpAiTranslations").value
+    aiTranslations:$("kdpAiTranslations").value,
+    channels:Array.from(screen.querySelectorAll('input[name="kdpChannel"]:checked')).map(el=>el.value),
+    legalName:$("kdpLegalName")?.value.trim()||"",country:$("kdpCountry")?.value||"AR",contactEmail:$("kdpContactEmail")?.value.trim()||"",quoteAccepted:Boolean($("kdpQuoteAccepted")?.checked)
   });
   function readiness(data){
     const checks=[
@@ -53,6 +55,8 @@
     $("kdpAiText").value=project.aiText||"unknown";
     $("kdpAiImages").value=project.aiImages||"unknown";
     $("kdpAiTranslations").value=project.aiTranslations||"unknown";
+    $("kdpLegalName").value=project.legalName||"";$("kdpCountry").value=project.country||"AR";$("kdpContactEmail").value=project.contactEmail||"";$("kdpQuoteAccepted").checked=Boolean(project.quoteAccepted);
+    screen.querySelectorAll('input[name="kdpChannel"]').forEach(el=>el.checked=(project.channels||["amazon"]).includes(el.value));
     readiness(collect());
   }
   async function loadBook(id){
@@ -76,9 +80,11 @@
   $("kdpBookSelect").addEventListener("change",event=>loadBook(event.target.value).catch(()=>toastMessage("No se pudo abrir el proyecto editorial.")));
   screen.querySelectorAll("input,textarea,select").forEach(el=>el.addEventListener("change",()=>readiness(collect())));
   ["kdpBookTitle","kdpAuthor","kdpDescription"].forEach(id=>$(id).addEventListener("input",()=>readiness(collect())));
+  $("kdpVoiceHelp")?.addEventListener("click",()=>{const hint=$("kdpVoiceHint");const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){hint.textContent="Este dispositivo no ofrece dictado web en esta pantalla. Podés usar el micrófono de LIBRA para dictar el contenido y completar estos datos una sola vez.";return;}const recognition=new SR();recognition.lang="es-AR";recognition.interimResults=false;recognition.onresult=event=>{const said=event.results[0][0].transcript;hint.textContent="Te escuché: "+said+" · Decime en qué campo querés guardar esta información.";};recognition.onerror=()=>hint.textContent="No pudimos iniciar el dictado. Podés escribirlo o usar el micrófono principal de LIBRA.";hint.textContent="Escuchando… hablá ahora.";recognition.start();});
   $("kdpSaveProject").addEventListener("click",async()=>{
     if(!selectedBook){toastMessage("Primero elegí un libro de tu biblioteca.");return;}
     const data=collect();
+    if(data.route==="managed"&&!data.legalName){toastMessage("Para la modalidad editorial necesitamos identificar al titular del contrato.");return;}
     const existing=await readOne("publicationProjects","book-"+selectedBook.id);
     const now=new Date().toISOString();
     const snapshot={...data,savedAt:now,version:(existing?.version||0)+1};
