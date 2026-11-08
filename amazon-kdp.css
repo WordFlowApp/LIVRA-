@@ -10,3 +10,12 @@
 .kdp-readiness-row .is-pending{color:#ffd36a;font-weight:900}
 .kdp-readiness-note{font-size:13px!important;margin:8px 0 0!important;padding-top:10px;border-top:1px solid #45678e}
 .kdp-screen .kdp-secondary-button+.kdp-secondary-button{margin-top:10px}
+
+.kdp-platforms{display:grid;gap:12px}
+.kdp-platform-card{padding:14px;border:1px solid #45678e;border-radius:15px;background:#081d3a}
+.kdp-platform-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.kdp-platform-top strong{font-size:17px;color:#fff}
+.kdp-cost-free{font-size:12px;font-weight:900;color:#8ce8c1;background:#103b3a;border:1px solid #287b69;border-radius:20px;padding:5px 9px;white-space:nowrap}
+.kdp-platform-card p{font-size:14px;line-height:1.5;margin:9px 0;color:#d0def1}
+.kdp-platform-card a{display:inline-block;color:#80dfff;font-size:14px;font-weight:800;margin:2px 0 8px;text-decoration:underline}
+.kdp-platform-card small{display:block;color:#ffd78a;font-size:12px;line-height:1.45;margin-top:6px}
