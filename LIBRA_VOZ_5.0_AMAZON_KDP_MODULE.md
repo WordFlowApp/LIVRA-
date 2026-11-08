@@ -39,3 +39,30 @@ Los campos de metadatos y formatos de esta primera pantalla son preparación loc
 
 ### Verificación pendiente
 La compilación Android y las pruebas automatizadas de esta revisión están pendientes. Todavía no se realizaron pruebas en un dispositivo Android físico. No declarar esta pantalla lista para producción hasta completar CI, revisión de accesibilidad, persistencia, pruebas en Android y validación de archivos reales con KDP.
+
+
+## Update — dual publishing Phase 1 (2026-11-08)
+
+Product owner selected both routes:
+- Independent author: author's own KDP account; Amazon pays the author directly.
+- Managed LIBRA editorial: a legally constituted LIBRA publishing entity is the KDP publisher and receives royalties, then settles authors under signed agreements.
+
+Phase 1 implementation added:
+- Mobile-first publishing route choice.
+- Selection of an existing library book from IndexedDB.
+- Prefilled/editable title, author and description.
+- Format choices.
+- Rights confirmation and separate AI provenance selectors for text, images and translations; none are preselected.
+- Readiness checklist.
+- Local versioned publication project storage in a new IndexedDB object store, without changing book records.
+- Explicit status that saving is local preparation only and does not submit or publish to Amazon.
+- Architecture and staged delivery plan in LIBRA_VOZ_DUAL_PUBLISHING_ARCHITECTURE.md.
+
+Not implemented yet:
+- EPUB/PDF/cover file generation or deterministic preflight.
+- Cloudflare/backend sync, editorial staff permissions, contracts, royalty statements, reconciliation or author payouts.
+- Amazon API integration or automated KDP upload.
+- Legal/accounting validation for the managed editorial route.
+- Physical Android device testing and fresh CI validation for these latest commits.
+
+The managed route is a design choice and saved draft option only; it must remain unavailable for real submissions until the publisher entity, contract, tax/accounting workflow and Amazon eligibility are confirmed.
