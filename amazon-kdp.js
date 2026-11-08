@@ -2,7 +2,8 @@
   const $=id=>document.getElementById(id);
   const screen=$("amazonEditorial");
   if(!screen)return;
-  $("openEditorial")?.addEventListener("click",function(){if(typeof show==="function")show("amazonEditorial");});\n  $("publishAmazon")?.addEventListener("click",function(){if(typeof show==="function")show("amazonEditorial");});
+  $("openEditorial")?.addEventListener("click",function(){if(typeof show==="function")show("amazonEditorial");});
+  $("publishAmazon")?.addEventListener("click",function(){if(typeof show==="function")show("amazonEditorial");});
   $("kdpBackLibrary")?.addEventListener("click",function(){if(typeof show==="function")show("library");});
   $("kdpCopyMetadata")?.addEventListener("click",async function(){
     const formats=Array.from(screen.querySelectorAll('input[name="kdpFormat"]:checked')).map(el=>el.value);
