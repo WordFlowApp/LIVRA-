@@ -66,3 +66,21 @@ Not implemented yet:
 - Physical Android device testing and fresh CI validation for these latest commits.
 
 The managed route is a design choice and saved draft option only; it must remain unavailable for real submissions until the publisher entity, contract, tax/accounting workflow and Amazon eligibility are confirmed.
+
+
+## Update — first export actions (2026-11-08)
+
+Implemented on the isolated 5.0 development branch:
+- EPUB 3 draft generation from a selected library book, including title, author, summary/prologue/pages or transcript, navigation document, stylesheet, package metadata and ZIP container.
+- Print-layout HTML with a cover/title page and chapter breaks; user can use the browser's Print → Save as PDF workflow.
+- Explicit copy clarifies that the print layout is not yet a KDP-validated PDF.
+- Service worker cache updated to include the editorial assets.
+
+Still pending before describing files as KDP-ready:
+- Validate generated EPUB in an EPUBCheck-equivalent validator and Kindle Previewer.
+- Produce a true PDF export with selected trim size, paper/ink/bleed/page-count and exact KDP interior margins; current print layout is a draft HTML print workflow.
+- Generate a full-wrap print cover from final trim size, page count, paper and bleed.
+- Include and validate embedded fonts/images and accessibility/navigation requirements.
+- Test downloads and print flow on physical Android devices and WebView.
+- Reconcile EPUB metadata/provenance with the actual AI-generation record.
+- Fresh CI and device tests for these commits.
