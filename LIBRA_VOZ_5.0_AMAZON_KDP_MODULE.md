@@ -84,3 +84,9 @@ Still pending before describing files as KDP-ready:
 - Test downloads and print flow on physical Android devices and WebView.
 - Reconcile EPUB metadata/provenance with the actual AI-generation record.
 - Fresh CI and device tests for these commits.
+
+## Multi-platform directory update (2026-11-08)
+- Corrected KDP misinformation: there is no mandatory 400/500 author-copy purchase. KDP print-on-demand does not require upfront print spend or inventory; author/proof copies are optional and charged separately.
+- Added an in-app mobile comparison directory for KDP, IngramSpark, Lulu, Kobo Writing Life, Apple Books and Barnes & Noble Press, with official links, cost/quantity notes, product scope and country caveats.
+- Lulu global distribution is not presented as a simultaneous duplicate channel for a book already listed on Amazon/another retail partner; author must choose compatible distribution routes.
+- Directory is informational only; no external account login, paid order or publication is initiated.
