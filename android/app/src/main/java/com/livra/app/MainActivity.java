@@ -13,6 +13,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,7 +31,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 import android.webkit.WebSettings;
 import android.widget.Toast;
 import android.content.Intent;
@@ -35,7 +40,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private static final int REQUEST_AUDIO = 2101;
-    private static final String APP_URL = "https://wordflowapp.github.io/LIVRA-/";
+    private static final String APP_URL = "https://wordflowapp.github.io/assets/www/index.html";
     private WebView webView;
     private SpeechRecognizer recognizer;
     private TextToSpeech livraTts;
@@ -48,6 +53,9 @@ public class MainActivity extends Activity {
     private ParcelFileDescriptor[] livraAudioPipe;
     private OutputStream livraSpeechPipe;
     private ByteArrayOutputStream livraPcm;
+    private FileOutputStream livraRecoveryStream;
+    private File livraRecoveryFile;
+    private static final String LIVRA_RECOVERY_FILE = "livra-pending-recovery.pcm";
     private Thread livraCaptureThread;
     private final AtomicBoolean livraRecording = new AtomicBoolean(false);
     private volatile boolean livraPaused = false;
@@ -94,13 +102,28 @@ public class MainActivity extends Activity {
                 });
             }
         });
-        webView.setWebViewClient(new WebViewClient() {
+        setContentView(webView);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .setDomain("wordflowapp.github.io")
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String host = request.getUrl().getHost();
                 return host == null || !host.equals("wordflowapp.github.io");
             }
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                File pending = new File(getFilesDir(), LIVRA_RECOVERY_FILE);
+                if (pending.exists() && pending.length() > 0) view.evaluateJavascript("window.LIVRAOnPendingRecordingAvailable && window.LIVRAOnPendingRecordingAvailable()", null);
+            }
         });
-        setContentView(webView);
         webView.loadUrl(APP_URL);
     }
 
@@ -116,6 +139,9 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public void startRecording() { runOnUiThread(() -> beginLivraRecording()); }
         @JavascriptInterface public void stopRecording() { runOnUiThread(() -> finishLivraRecording()); }
+        @JavascriptInterface public void recoverPendingRecording() { runOnUiThread(() -> sendPendingRecovery()); }
+        @JavascriptInterface public void acknowledgeRecovery(String id) { runOnUiThread(() -> acknowledgePendingRecovery(id)); }
+        @JavascriptInterface public void discardRecording() { runOnUiThread(() -> discardPendingRecovery()); }
         @JavascriptInterface public void pauseRecording() { livraPaused = true; }
         @JavascriptInterface public void resumeRecording() { livraPaused = false; }
         @JavascriptInterface public void start() { runOnUiThread(() -> startNativeRecognition()); }
@@ -136,6 +162,8 @@ public class MainActivity extends Activity {
             sendToPage("recordingError", "Permití el micrófono de LIVRA."); return;
         }
         if (livraRecording.get()) return;
+        File pending = new File(getFilesDir(), LIVRA_RECOVERY_FILE);
+        if (pending.exists() && pending.length() > 0) { sendToPage("recordingError", "Hay una grabación pendiente de recuperar. Recuperala antes de iniciar otra."); return; }
         try {
             int min = AudioRecord.getMinBufferSize(LIVRA_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
             if (min <= 0) throw new IllegalStateException("AudioRecord no está disponible");
@@ -145,6 +173,8 @@ public class MainActivity extends Activity {
             livraAudioPipe = ParcelFileDescriptor.createPipe();
             livraSpeechPipe = new ParcelFileDescriptor.AutoCloseOutputStream(livraAudioPipe[1]);
             livraPcm = new ByteArrayOutputStream();
+            livraRecoveryFile = pending;
+            livraRecoveryStream = new FileOutputStream(livraRecoveryFile, false);
             livraPaused = false;
             startSpeechFromAudioPipe(livraAudioPipe[0]);
             livraAudioRecord.startRecording();
@@ -156,8 +186,9 @@ public class MainActivity extends Activity {
                     int n = livraAudioRecord.read(buf, 0, buf.length);
                     if (n > 0) {
                         synchronized (livraPcm) { livraPcm.write(buf, 0, n); }
+                        try { if (livraRecoveryStream != null) { livraRecoveryStream.write(buf, 0, n); livraRecoveryStream.flush(); } } catch (IOException fileError) { sendToPage("recordingError", "No se pudo proteger el archivo temporal de audio. Se conservará el archivo parcial."); handler.post(() -> finishLivraRecording()); break; }
                         try { livraSpeechPipe.write(buf, 0, n); livraSpeechPipe.flush(); } catch (IOException closedPipe) { /* Keep saving audio. */ }
-                    } else if (n < 0 && livraRecording.get()) { sendToPage("recordingError", "Error leyendo el micrófono."); break; }
+                    } else if (n < 0 && livraRecording.get()) { sendToPage("recordingError", "Error leyendo el micrófono. Se finalizará la grabación parcial."); handler.post(() -> finishLivraRecording()); break; }
                 }
             }, "LIVRA-AudioCapture");
             livraCaptureThread.start();
@@ -205,15 +236,17 @@ public class MainActivity extends Activity {
     private void finishLivraRecording() {
         if (!livraRecording.getAndSet(false)) return;
         try { if (livraAudioRecord != null) livraAudioRecord.stop(); } catch (Exception ignored) {}
-        try { if (livraCaptureThread != null) livraCaptureThread.join(1200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        try { if (livraCaptureThread != null) livraCaptureThread.join(5000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        if (livraCaptureThread != null && livraCaptureThread.isAlive()) { sendToPage("recordingError", "El micrófono todavía está cerrando. El audio temporal se conserva; volvé a intentar detenerlo."); return; }
         try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {}
         if (recognizer != null) { try { recognizer.stopListening(); } catch (Exception ignored) {} handler.postDelayed(() -> { if (recognizer != null) { recognizer.destroy(); recognizer = null; } }, 1600); }
+        closeRecoveryStream();
         byte[] pcm;
         synchronized (livraPcm == null ? this : livraPcm) { pcm = livraPcm == null ? new byte[0] : livraPcm.toByteArray(); }
         byte[] wav = livraMakeWav(pcm);
         cleanupLivraAudio();
         int chunkSize = 24000, total = (wav.length + chunkSize - 1) / chunkSize;
-        sendToPage("audioStart", String.valueOf(total));
+        sendToPage("audioStart", total + "|pending|" + Math.max(0, pcm.length / (LIVRA_SAMPLE_RATE * 2)));
         for (int p = 0; p < total; p++) {
             int start = p * chunkSize, len = Math.min(chunkSize, wav.length - start);
             byte[] chunk = new byte[len]; System.arraycopy(wav, start, chunk, 0, len);
@@ -231,6 +264,38 @@ public class MainActivity extends Activity {
     }
     private void livraWriteLE(DataOutputStream d, int v) throws IOException { d.writeByte(v & 255); d.writeByte((v >> 8) & 255); d.writeByte((v >> 16) & 255); d.writeByte((v >> 24) & 255); }
     private void livraWriteLEShort(DataOutputStream d, int v) throws IOException { d.writeByte(v & 255); d.writeByte((v >> 8) & 255); }
+    private void closeRecoveryStream() { if (livraRecoveryStream != null) { try { livraRecoveryStream.flush(); livraRecoveryStream.getFD().sync(); livraRecoveryStream.close(); } catch (IOException ignored) {} livraRecoveryStream = null; } }
+    private void sendPendingRecovery() {
+        File file = new File(getFilesDir(), LIVRA_RECOVERY_FILE);
+        if (!file.exists() || file.length() < 2) { sendToPage("recordingError", "No hay una grabación pendiente para recuperar."); return; }
+        try (FileInputStream input = new FileInputStream(file); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[32768]; int count; while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+            byte[] pcm = output.toByteArray(); if (pcm.length < 2) throw new IOException("Audio vacío");
+            byte[] wav = livraMakeWav(pcm); int chunkSize = 24000, total = (wav.length + chunkSize - 1) / chunkSize;
+            sendToPage("audioStart", total + "|pending|" + Math.max(0, pcm.length / (LIVRA_SAMPLE_RATE * 2)));
+            for (int p = 0; p < total; p++) { int start = p * chunkSize, len = Math.min(chunkSize, wav.length - start); byte[] chunk = new byte[len]; System.arraycopy(wav, start, chunk, 0, len); sendToPage("audioChunk", p + "|" + android.util.Base64.encodeToString(chunk, android.util.Base64.NO_WRAP)); }
+            sendToPage("audioEnd", String.valueOf(wav.length));
+        } catch (Exception error) { sendToPage("recordingError", "No se pudo recuperar el audio pendiente. El archivo original se conservó."); }
+    }
+    private void acknowledgePendingRecovery(String id) { if (!"pending".equals(id)) return; File file = new File(getFilesDir(), LIVRA_RECOVERY_FILE); if (file.exists() && !file.delete()) Toast.makeText(this, "El audio ya está guardado; no se pudo limpiar el temporal.", Toast.LENGTH_LONG).show(); }
+    private void discardPendingRecovery() {
+        // Explicit cancel: stop capture and delete the temporary file without emitting audioEnd,
+        // so JavaScript cannot accidentally turn a cancelled recording into a saveable Blob.
+        livraRecording.set(false);
+        try { if (livraAudioRecord != null) livraAudioRecord.stop(); } catch (Exception ignored) {}
+        try { if (livraCaptureThread != null) livraCaptureThread.join(5000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        if (livraCaptureThread != null && livraCaptureThread.isAlive()) {
+            sendToPage("recordingError", "No se pudo detener el micrófono todavía. El audio temporal se conserva por seguridad.");
+            return;
+        }
+        try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {}
+        if (recognizer != null) { try { recognizer.stopListening(); recognizer.destroy(); } catch (Exception ignored) {} recognizer = null; }
+        closeRecoveryStream();
+        cleanupLivraAudio();
+        livraPcm = null;
+        File file = new File(getFilesDir(), LIVRA_RECOVERY_FILE);
+        if (file.exists() && !file.delete()) sendToPage("recordingError", "No se pudo eliminar el audio cancelado.");
+    }
     private void cleanupLivraAudio() {
         if (livraAudioRecord != null) { try { livraAudioRecord.release(); } catch (Exception ignored) {} livraAudioRecord = null; }
         try { if (livraSpeechPipe != null) livraSpeechPipe.close(); } catch (Exception ignored) {} livraSpeechPipe = null;
@@ -371,6 +436,9 @@ public class MainActivity extends Activity {
 
     @Override protected void onDestroy() {
         livraRecording.set(false);
+        try { if (livraAudioRecord != null) livraAudioRecord.stop(); } catch (Exception ignored) {}
+        try { if (livraCaptureThread != null) livraCaptureThread.join(1500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        closeRecoveryStream();
         cleanupLivraAudio();
         stopNativeRecognition();
         if (livraTts != null) { livraTts.stop(); livraTts.shutdown(); livraTts = null; livraTtsReady = false; }

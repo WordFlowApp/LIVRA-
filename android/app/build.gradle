@@ -1,4 +1,4 @@
-// LIVRA Android wrapper — text edition 4.9.4.
+// LIBRA VOZ Android release candidate 5.1.0.
 plugins {
     id 'com.android.application'
 }
@@ -9,14 +9,43 @@ android {
 
     defaultConfig {
         applicationId 'com.livra.app'
-        minSdk 26
+        // Native shared AudioRecord/SpeechRecognizer capture uses segmented audio-source APIs (Android 13+).
+        // Keep minSdk aligned with the runtime guard in MainActivity until a tested legacy capture path exists.
+        minSdk 33
         targetSdk 35
-        versionCode 18
-        versionName '4.9.4'
+        versionCode 21
+        versionName '5.1.0'
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+}
+
+ 
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+}
+
+def livraWebRoot = rootProject.projectDir.parentFile
+tasks.register('copyLivraWebAssets', Copy) {
+    from(livraWebRoot) {
+        include 'index.html'
+        include 'app.js'
+        include 'styles.css'
+        include 'sw.js'
+        include 'manifest.webmanifest'
+        include 'library-grid.css'
+        include 'typographic-covers.css'
+        include 'amazon-kdp.css'
+        include 'amazon-kdp.js'
+        include 'icons/**'
+    }
+    into layout.buildDirectory.dir('generated/livraAssets/www')
+}
+
+android.sourceSets.main.assets.srcDir(layout.buildDirectory.dir('generated/livraAssets'))
+tasks.named('preBuild').configure {
+    dependsOn tasks.named('copyLivraWebAssets')
 }
