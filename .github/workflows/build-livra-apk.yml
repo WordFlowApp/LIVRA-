@@ -51,8 +51,13 @@ jobs:
           assert.match(coverCss, /book-cover-typographic/);
           assert.match(gridCss, /grid-template-columns:\s*repeat\(3/);
           assert.match(gradle, /versionName '5\.0\.2'/);
-          assert.match(gradle, /versionCode 20/);
-          console.log('LIBRA VOZ 5.0.2 static checks passed.');
+          assert.match(gradle, /versionCode 21/);
+          assert.match(gradle, /versionName '5.1.0'/);
+          const activity = readFileSync('android/app/src/main/java/com/livra/app/MainActivity.java', 'utf8');
+          assert.match(activity, /WebViewAssetLoader/);
+          assert.match(activity, /appassets/);
+          assert.match(gradle, /copyLivraWebAssets/);
+          console.log('LIBRA VOZ 5.1.0 static checks passed.');
           NODE
       - name: Build debug APK
         run: gradle -p android assembleDebug
@@ -63,10 +68,13 @@ jobs:
           unzip -t "$APK"
           unzip -Z1 "$APK" | grep -qx 'AndroidManifest.xml'
           unzip -Z1 "$APK" | grep -q 'classes.dex'
+          unzip -Z1 "$APK" | grep -qx 'assets/www/index.html'
+          unzip -Z1 "$APK" | grep -qx 'assets/www/app.js'
+          unzip -Z1 "$APK" | grep -qx 'assets/www/styles.css'
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LIBRA-VOZ-5.0.2-debug-apk
+          name: LIBRA-VOZ-5.1.0-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
