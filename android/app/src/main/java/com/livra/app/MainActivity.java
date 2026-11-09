@@ -31,7 +31,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 import android.webkit.WebSettings;
 import android.widget.Toast;
 import android.content.Intent;
@@ -39,7 +40,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private static final int REQUEST_AUDIO = 2101;
-    private static final String APP_URL = "https://wordflowapp.github.io/LIVRA-/";
+    private static final String APP_URL = "https://appassets.androidplatform.net/assets/www/index.html";
     private WebView webView;
     private SpeechRecognizer recognizer;
     private TextToSpeech livraTts;
@@ -88,7 +89,7 @@ public class MainActivity extends Activity {
             @Override public void onPermissionRequest(android.webkit.PermissionRequest request) {
                 runOnUiThread(() -> {
                     String originHost = request.getOrigin() == null ? "" : request.getOrigin().getHost();
-                    if (!"wordflowapp.github.io".equals(originHost)) {
+                    if (!"appassets.androidplatform.net".equals(originHost)) {
                         request.deny();
                         return;
                     }
@@ -102,9 +103,25 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.setWebViewClient(new WebViewClient() {
-            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { String host = request.getUrl().getHost(); return host == null || !host.equals("wordflowapp.github.io"); }
-            @Override public void onPageFinished(WebView view, String url) { super.onPageFinished(view, url); File pending = new File(getFilesDir(), LIVRA_RECOVERY_FILE); if (pending.exists() && pending.length() > 0) view.evaluateJavascript("window.LIVRAOnPendingRecordingAvailable && window.LIVRAOnPendingRecordingAvailable()", null); }
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String host = request.getUrl().getHost();
+                return host == null || !host.equals("appassets.androidplatform.net");
+            }
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                File pending = new File(getFilesDir(), LIVRA_RECOVERY_FILE);
+                if (pending.exists() && pending.length() > 0) view.evaluateJavascript("window.LIVRAOnPendingRecordingAvailable && window.LIVRAOnPendingRecordingAvailable()", null);
+            }
         });
         webView.loadUrl(APP_URL);
     }
