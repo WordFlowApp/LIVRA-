@@ -54,7 +54,7 @@ jobs:
           assert.match(gradle, /versionCode 21/);
           const activity = readFileSync('android/app/src/main/java/com/livra/app/MainActivity.java', 'utf8');
           assert.match(activity, /WebViewAssetLoader/);
-          assert.match(activity, /appassets/);
+          assert.match(activity, /wordflowapp/);
           assert.match(gradle, /copyLivraWebAssets/);
           console.log('LIBRA VOZ 5.1.0 static checks passed.');
           NODE
