@@ -45,12 +45,12 @@ jobs:
           assert.match(app, /await getAll\("books"\)/);
           assert.doesNotMatch(app, /recoverMissingBookCovers|generateAICover|\/cover/);
           assert.doesNotMatch(html, /book-visuals\.js|book-visuals\.css/);
-          assert.match(html, /LIBRA VOZ 5\.0\.2/);
+          assert.match(html, /LIBRA VOZ 5\\.1\\.0/);
           assert.match(worker, /status: 410/);
           assert.match(worker, /superó el límite de 40 segundos/);
           assert.match(coverCss, /book-cover-typographic/);
           assert.match(gridCss, /grid-template-columns:\s*repeat\(3/);
-          assert.match(gradle, /versionName '5\.0\.2'/);
+          assert.match(gradle, /versionName '5.1.0'/);
           assert.match(gradle, /versionCode 21/);
           assert.match(gradle, /versionName '5.1.0'/);
           const activity = readFileSync('android/app/src/main/java/com/livra/app/MainActivity.java', 'utf8');
