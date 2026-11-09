@@ -1,15 +1,25 @@
 export default {
   async fetch(request, env) {
-    const allowedOrigin = "https://wordflowapp.github.io";
+    const allowedOrigins = new Set([
+      "https://wordflowapp.github.io",
+      "https://appassets.androidplatform.net"
+    ]);
     const origin = request.headers.get("Origin") || "";
-    const cors = {
-      "Access-Control-Allow-Origin": origin === allowedOrigin ? allowedOrigin : allowedOrigin,
+    const originAllowed = !origin || allowedOrigins.has(origin);
+    const cors = new Headers({
       "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Max-Age": "86400",
       "Vary": "Origin"
-    };
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+    });
+    if (origin && originAllowed) cors.set("Access-Control-Allow-Origin", origin);
+    if (request.method === "OPTIONS") {
+      if (!originAllowed) return new Response(null, { status: 403, headers: cors });
+      return new Response(null, { status: 204, headers: cors });
+    }
+    if (!originAllowed && request.method !== "GET") {
+      return Response.json({ error: "Origin not allowed." }, { status: 403 });
+    }
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/health") {
       return Response.json({ ok: true, service: "LIVRA transcription", model: "@cf/openai/whisper", configured: Boolean(env.AI) }, { headers: cors });
