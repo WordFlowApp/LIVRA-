@@ -1,4 +1,4 @@
-const CACHE="libra-voz-shell-v77";
+const CACHE="libra-voz-shell-v78";
 const FILES=["./","./index.html","./styles.css?v=60","./app.js?v=70","./manifest.webmanifest?v=21","./icons/livra.svg?v=22","./library-grid.css?v=1","./typographic-covers.css?v=1","./amazon-kdp.css?v=8","./amazon-kdp.js?v=6"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(FILES);}));self.skipWaiting();});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k.startsWith("livra-shell-")&&k!==CACHE;}).map(function(k){return caches.delete(k);}));}));self.clients.claim();});
