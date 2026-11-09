@@ -40,7 +40,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private static final int REQUEST_AUDIO = 2101;
-    private static final String APP_URL = "https://appassets.androidplatform.net/assets/www/index.html";
+    private static final String APP_URL = "https://wordflowapp.github.io/assets/www/index.html";
     private WebView webView;
     private SpeechRecognizer recognizer;
     private TextToSpeech livraTts;
@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
             @Override public void onPermissionRequest(android.webkit.PermissionRequest request) {
                 runOnUiThread(() -> {
                     String originHost = request.getOrigin() == null ? "" : request.getOrigin().getHost();
-                    if (!"appassets.androidplatform.net".equals(originHost)) {
+                    if (!"wordflowapp.github.io".equals(originHost)) {
                         request.deny();
                         return;
                     }
@@ -107,6 +107,7 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .setDomain("wordflowapp.github.io")
             .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
             .build();
         webView.setWebViewClient(new WebViewClientCompat() {
@@ -115,7 +116,7 @@ public class MainActivity extends Activity {
             }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String host = request.getUrl().getHost();
-                return host == null || !host.equals("appassets.androidplatform.net");
+                return host == null || !host.equals("wordflowapp.github.io");
             }
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
