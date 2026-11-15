@@ -752,3 +752,12 @@ body,button,input,textarea,select{font-family:var(--livra-font)!important}
 #recording .record-controls{flex:0 0 auto;position:relative;z-index:2}
 #recording #cancelRecording{flex:0 0 auto;min-height:52px}
 #library .book-grid{scroll-behavior:smooth}
+
+
+/* LIBRA VOZ 5.0.2 — official identity lockup */
+.topbar-brand{display:flex;align-items:center;gap:9px;min-width:0;letter-spacing:1.2px;font-size:19px;font-weight:900}
+.brand-logo{display:block;width:36px;height:36px;object-fit:contain;flex:0 0 36px;border-radius:9px}
+
+/* LIBRA VOZ 5.1.1 — explicit, user-initiated command listening */
+#home .voice-command-home{background:linear-gradient(115deg,#18c9e8,#1267f5);border:2px solid #9be7ff;color:#fff;box-shadow:0 7px 0 #06458c,0 12px 28px #16c8ef35}
+.voice-command-status{width:100%;min-height:22px;margin:-8px 0 0;text-align:center;color:#c9e7ff;font-size:14px;line-height:1.35}

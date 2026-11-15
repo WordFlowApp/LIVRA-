@@ -1,14 +1,14 @@
 {
   "id": "./",
-  "name": "LIVRA 4.9.3 — Text Edition",
-  "short_name": "LIVRA",
+  "name": "LIBRA VOZ",
+  "short_name": "LIBRA VOZ",
   "description": "Grabá tus historias y convertí tus palabras en libros.",
   "lang": "es-AR",
-  "start_url": "./?v=19",
+  "start_url": "./?v=22",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#061a3b",
+  "background_color": "#07172f",
   "theme_color": "#061a3b",
-  "icons": [{"src":"./icons/livra.svg?v=20","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "icons": [{"src":"./icons/livra.svg?v=22","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
