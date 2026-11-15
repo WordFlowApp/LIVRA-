@@ -33,6 +33,7 @@ tasks.register('copyLivraWebAssets', Copy) {
     from(livraWebRoot) {
         include 'index.html'
         include 'app.js'
+        include 'voice-commands.js'
         include 'styles.css'
         include 'sw.js'
         include 'manifest.webmanifest'

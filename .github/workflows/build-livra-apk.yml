@@ -28,6 +28,8 @@ jobs:
       - name: Validate JavaScript and text-only book flow
         run: |
           node --check app.js
+          node --check voice-commands.js
+          node --test voice-commands.test.cjs
           node --check worker/src/index.js
           node --check sw.js
           node --input-type=module <<'NODE'
@@ -35,6 +37,7 @@ jobs:
           import assert from 'node:assert/strict';
           const app = readFileSync('app.js', 'utf8');
           const html = readFileSync('index.html', 'utf8');
+          const voiceCommands = readFileSync('voice-commands.js', 'utf8');
           const worker = readFileSync('worker/src/index.js', 'utf8');
           const coverCss = readFileSync('typographic-covers.css', 'utf8');
           const gridCss = readFileSync('library-grid.css', 'utf8');
@@ -56,7 +59,14 @@ jobs:
           assert.match(activity, /WebViewAssetLoader/);
           assert.match(activity, /wordflowapp/);
           assert.match(gradle, /copyLivraWebAssets/);
-          console.log('LIBRA VOZ 5.1.0 static checks passed.');
+          assert.match(html, /id="voiceCommandButton"/);
+          assert.match(html, /voice-commands\.js/);
+          assert.match(app, /startCommandListening/);
+          assert.match(app, /LIVRACommandParser\.parse/);
+          assert.match(voiceCommands, /openEditorial/);
+          assert.match(activity, /startCommandListening/);
+          assert.match(activity, /commandResult/);
+          console.log('LIBRA VOZ 5.1.1 voice command bridge checks passed.');
           NODE
       - name: Build debug APK
         run: gradle -p android assembleDebug
@@ -70,6 +80,7 @@ jobs:
           unzip -Z1 "$APK" | grep -qx 'assets/www/index.html'
           unzip -Z1 "$APK" | grep -qx 'assets/www/app.js'
           unzip -Z1 "$APK" | grep -qx 'assets/www/styles.css'
+          unzip -Z1 "$APK" | grep -qx 'assets/www/voice-commands.js'
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:

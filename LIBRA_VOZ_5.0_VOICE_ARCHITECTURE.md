@@ -1,6 +1,6 @@
 # LIBRA VOZ 5.0 — Arquitectura de interacción por voz
 
-**Estado:** diseño técnico propuesto para implementación incremental.  
+**Estado:** MVP de comandos explícitos implementado en la rama de corrección 5.1.1; pendiente de CI y validación en Android físico. El MVP incorpora una sesión nativa de un solo comando, separada del dictado, con una lista cerrada de acciones. No implementa escucha permanente ni afirma que el catálogo completo esté terminado.  
 **Regla:** el canal de dictado y el canal de comandos son sesiones distintas. Nunca deben escuchar/escribir en el mismo buffer.
 
 ## 1. Principio de interacción
@@ -80,12 +80,19 @@ La confirmación puede ser táctil o hablada, pero para operaciones destructivas
 
 ## 7. Implementación por etapas
 
-1. Crear un módulo `VoiceSessionController` independiente de la lógica editorial.
-2. Encapsular la sesión nativa Android y la sesión web en adaptadores separados.
-3. Añadir un parser de intenciones limitado a un catálogo explícito; no ejecutar texto arbitrario como código ni aceptar instrucciones no autorizadas.
-4. Añadir confirmaciones y pruebas unitarias de cada intención.
-5. Simular eventos cruzados para demostrar que los comandos no contaminan la transcripción.
-6. Probar en hardware con interrupciones, pérdida de red, cambios de foco de audio y permisos denegados.
+MVP incorporado en la rama de corrección 5.1.1:
+- Botón explícito **HABLAR CON LIBRA**; no hay escucha permanente.
+- Sesión de reconocimiento nativa de una orden, idioma es-AR.
+- El comando se rechaza si hay un dictado/grabación activo; no comparte el buffer del manuscrito.
+- El frontend procesa únicamente intenciones de una lista cerrada: biblioteca, grabaciones, editorial, inicio y comenzar a grabar.
+- Las frases desconocidas no ejecutan acciones. “Publicar mi libro” no publica ni envía nada; se requiere abrir la preparación editorial.
+- Parser puro con pruebas Node para acentos, palabra de activación y rechazo de órdenes no admitidas.
+
+Pendiente para completar la arquitectura:
+1. Extraer un `VoiceSessionController` formal con identificadores de sesión.
+2. Añadir confirmaciones explícitas para las acciones que modifiquen o eliminen contenido.
+3. Simular eventos cruzados para demostrar que los comandos no contaminan la transcripción.
+4. Probar en hardware con interrupciones, pérdida de red, cambios de foco de audio y permisos denegados.
 
 ## 8. Criterios de aceptación
 

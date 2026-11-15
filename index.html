@@ -21,6 +21,8 @@
   <button id="startRecording" class="big-button record-home"><span class="button-icon">🎙</span> GRABAR</button>
   <button id="openLibrary" class="big-button library-home"><span class="button-icon">▤</span> MI BIBLIOTECA</button>
   <button id="openEditorial" class="big-button editorial-home" type="button"><span class="button-icon">🌎</span> MI EDITORIAL</button>
+  <button id="voiceCommandButton" class="big-button voice-command-home" type="button" aria-pressed="false"><span class="button-icon">🎙</span> HABLAR CON LIBRA</button>
+  <p id="voiceCommandStatus" class="voice-command-status" role="status" aria-live="polite">Tocá para darle una orden a LIBRA. El micrófono no se activa hasta que lo pidas.</p>
 </section>
 <section id="recording" class="screen">
   <div class="screen-heading"><h1>Contá tu historia</h1></div>
@@ -90,5 +92,5 @@
   <div class="reader-navigation"><button id="prevPage" class="control-button pause">← ANTERIOR</button><span id="pageCount">1 / 1</span><button id="nextPage" class="control-button pause">SIGUIENTE →</button></div><div class="reader-bottom-tools"><button id="readBook" class="reader-tool reader-mode">📖 Leer</button><button id="listenBook" class="reader-tool reader-audio">🎧 Escuchar</button><button id="stopAudiobook" class="reader-tool audiobook-stop hidden">■ Detener</button><button id="retryCover" class="reader-tool hidden">🎨 Tapa</button></div>
 </section>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-</main><footer>Tu voz. Tu historia. Tu libro.</footer><script src="./app.js?v=70"></script><script src="./amazon-kdp.js?v=6"></script>
+</main><footer>Tu voz. Tu historia. Tu libro.</footer><script src="./voice-commands.js?v=1"></script><script src="./app.js?v=71"></script><script src="./amazon-kdp.js?v=6"></script>
 </body></html>

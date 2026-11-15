@@ -30,23 +30,92 @@ function descriptiveAudioTitle(text){
 }
 function isGenericAudioTitle(value){return /^(primera|segunda|tercera|cuarta|quinta|sexta|séptima|octava|novena|décima) historia$|^historia \d+$/i.test(String(value||"").trim());}
 async function blobFingerprint(blob){const bytes=await blob.arrayBuffer();const digest=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(digest)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");}
-let waitingForNativeMicPermission=false;
+let pendingMicAction="";
 window.LIVRAOnMicPermission=function(granted){
-  if(!waitingForNativeMicPermission)return;
-  waitingForNativeMicPermission=false;
-  if(granted)beginRecording();
-  else toast("Para grabar, necesitás permitir el micrófono de LIVRA.");
-};
-function requestMicThenRecord(){
-  if(window.LIVRAAndroidSpeech&&typeof window.LIVRAAndroidSpeech.requestMicPermission==="function"){
-    waitingForNativeMicPermission=true;
-    try{window.LIVRAAndroidSpeech.requestMicPermission();}
-    catch(e){waitingForNativeMicPermission=false;toast("No se pudo solicitar el permiso del micrófono.");}
+  const action=pendingMicAction;
+  pendingMicAction="";
+  if(!action)return;
+  if(!granted){
+    if(action==="command")updateVoiceCommandUI(false,"Necesitás permitir el micrófono para hablar con LIBRA.");
+    else toast("Para grabar, necesitás permitir el micrófono de LIBRA.");
     return;
   }
-  beginRecording();
+  if(action==="command")startNativeCommandListening();
+  else beginRecording();
+};
+function requestMicFor(action){
+  if(window.LIVRAAndroidSpeech&&typeof window.LIVRAAndroidSpeech.requestMicPermission==="function"){
+    pendingMicAction=action;
+    try{window.LIVRAAndroidSpeech.requestMicPermission();}
+    catch(e){pendingMicAction="";if(action==="command")updateVoiceCommandUI(false,"No se pudo solicitar el micrófono.");else toast("No se pudo solicitar el permiso del micrófono.");}
+    return;
+  }
+  if(action==="record")beginRecording();
+  else updateVoiceCommandUI(false,"Los comandos de voz nativos están disponibles en la aplicación Android.");
+}
+function requestMicThenRecord(){requestMicFor("record");}
+function requestMicThenCommand(){
+  if(nativeRecording||(recorder&&recorder.state!=="inactive")){
+    toast("Primero finalizá o cancelá la grabación para usar los comandos de LIBRA.");
+    return;
+  }
+  requestMicFor("command");
 }
 let nativeRecording=false,nativeAudioChunks=[],nativeRecoveryId="",nativeAudioSeconds=0;
+let nativeCommandListening=false;
+function updateVoiceCommandUI(active,message){
+  const button=$("voiceCommandButton"),status=$("voiceCommandStatus");
+  if(button){
+    button.innerHTML=active?'<span class="button-icon">■</span> DETENER ESCUCHA':'<span class="button-icon">🎙</span> HABLAR CON LIBRA';
+    button.setAttribute("aria-pressed",String(Boolean(active)));
+  }
+  if(status&&message)status.textContent=message;
+}
+function startNativeCommandListening(){
+  const bridge=window.LIVRAAndroidSpeech;
+  if(!bridge||typeof bridge.startCommandListening!=="function"){
+    updateVoiceCommandUI(false,"Los comandos de voz requieren la aplicación Android.");
+    return;
+  }
+  if(nativeRecording||(recorder&&recorder.state!=="inactive")){
+    updateVoiceCommandUI(false,"Primero finalizá el dictado. Los comandos no se mezclan con tu libro.");
+    return;
+  }
+  nativeCommandListening=true;
+  updateVoiceCommandUI(true,"Preparando el micrófono…");
+  try{bridge.startCommandListening();}
+  catch(error){nativeCommandListening=false;updateVoiceCommandUI(false,"No se pudo iniciar la escucha. Volvé a intentarlo.");}
+}
+window.LIVRAOnNativeCommandStatus=function(value){
+  if(value==="stopped"){nativeCommandListening=false;updateVoiceCommandUI(false,"Escucha detenida.");return;}
+  nativeCommandListening=true;updateVoiceCommandUI(true,"Escuchando. Decí una orden breve para LIBRA.");
+};
+window.LIVRAOnNativeCommandPartial=function(value){
+  const phrase=String(value||"").trim();
+  if(phrase)updateVoiceCommandUI(true,"Te escucho: "+phrase);
+};
+window.LIVRAOnNativeCommandError=function(value){
+  nativeCommandListening=false;
+  const code=String(value||"");
+  const message=code==="no_match"?"No llegué a reconocer la orden. Tocá y probá otra vez.":code==="speech_unavailable"?"Este dispositivo no tiene un servicio de reconocimiento de voz disponible.":code==="mic_permission"?"Permití el micrófono para usar los comandos.":"No pude reconocer la orden (código "+code+"). Revisá el micrófono y la conexión.";
+  updateVoiceCommandUI(false,message);
+};
+window.LIVRAOnNativeCommandResult=function(value){
+  nativeCommandListening=false;
+  const transcript=String(value||"").trim();
+  const parsed=window.LIVRACommandParser?window.LIVRACommandParser.parse(transcript):null;
+  if(!parsed){updateVoiceCommandUI(false,'No reconocí "'+transcript+'". Probá: "abrir biblioteca", "abrir editorial" o "comenzar a grabar".');return;}
+  updateVoiceCommandUI(false,"Entendí: "+transcript);
+  switch(parsed.intent){
+    case "openLibrary":show("library");break;
+    case "openRecordings":show("audioFiles");break;
+    case "openEditorial":$("openEditorial").click();break;
+    case "goHome":show("home");break;
+    case "startRecording":window.setTimeout(requestMicThenRecord,500);break;
+    case "stopListening":updateVoiceCommandUI(false,"Escucha detenida.");break;
+    default:updateVoiceCommandUI(false,"Esa orden todavía no está disponible.");break;
+  }
+};
 window.LIVRAOnNativeSpeechStatus=function(){ $("recordState").textContent="Reconociendo tu voz…"; };
 window.LIVRAOnNativeSpeechError=function(){ $("recordState").textContent="La grabación continúa; el servicio de voz todavía no devolvió texto."; };
 window.LIVRAOnNativeSpeechPartial=function(value){const phrase=(value||"").trim();if(phrase)updateTranscript((finalTranscript+" "+phrase).trim());};
@@ -65,6 +134,15 @@ async function beginRecording(){if(window.LIVRAAndroidSpeech&&typeof window.LIVR
 
 $("startRecording").addEventListener("click",requestMicThenRecord);
 $("libraryRecord").addEventListener("click",requestMicThenRecord);
+$("voiceCommandButton").addEventListener("click",function(){
+  if(nativeCommandListening){
+    if(window.LIVRAAndroidSpeech&&typeof window.LIVRAAndroidSpeech.stopCommandListening==="function")window.LIVRAAndroidSpeech.stopCommandListening();
+    nativeCommandListening=false;
+    updateVoiceCommandUI(false,"Escucha detenida.");
+    return;
+  }
+  requestMicThenCommand();
+});
 $("pauseRecording").addEventListener("click",function(){if(nativeRecording&&window.LIVRAAndroidSpeech){if($("recordState").textContent==="En pausa"){window.LIVRAAndroidSpeech.resumeRecording();startTimer();$("recordState").textContent="Grabando y transcribiendo";$("micVisual").classList.add("is-recording");$("waveform").classList.add("is-active");$("pauseRecording").innerHTML="<span>Ⅱ</span> PAUSA";}else{window.LIVRAAndroidSpeech.pauseRecording();stopTimer();$("recordState").textContent="En pausa";$("micVisual").classList.remove("is-recording");$("waveform").classList.remove("is-active");$("pauseRecording").innerHTML="<span>▶</span> SEGUIR";}return;}if(!recorder)return;if(recorder.state==="recording"){recorder.pause();stopTimer();stopRecognition();$("pauseRecording").innerHTML="<span>▶</span> SEGUIR";$("recordState").textContent="En pausa";$("micVisual").classList.remove("is-recording");$("waveform").classList.remove("is-active");}else if(recorder.state==="paused"){recorder.resume();startTimer();startRecognition();$("pauseRecording").innerHTML="<span>Ⅱ</span> PAUSA";$("recordState").textContent="Grabando";$("micVisual").classList.add("is-recording");$("waveform").classList.add("is-active");}});
 $("stopRecording").addEventListener("click",function(){if(seconds<120){$("recordState").textContent="Grabación detenida. Dura menos de 2 minutos; podés guardarla igualmente sin perder el audio." ;toast("Tu historia dura menos de 2 minutos. Podés guardarla igualmente; el audio no se perderá.");}if(nativeRecording&&window.LIVRAAndroidSpeech){stopTimer();if(seconds>=120)$("recordState").textContent="Finalizando audio y transcripción…";window.LIVRAAndroidSpeech.stopRecording();return;}if(recorder&&recorder.state!=="inactive"){stopRecognition();stopTimer();if(seconds>=120)$("recordState").textContent="Terminando grabación…";recorder.stop();}});
 $("cancelRecording").addEventListener("click",function(){if((nativeRecording||nativeRecoveryId)&&window.LIVRAAndroidSpeech){window.LIVRAAndroidSpeech.discardRecording();nativeRecording=false;nativeRecoveryId="";nativeAudioChunks=[];nativeAudioSeconds=0;}if(recorder&&recorder.state!=="inactive"){stopRecognition();stopTimer();recorder.onstop=null;try{recorder.stop();}catch(e){}releaseStream();}currentBlob=null;chunks=[];seconds=0;$("micVisual").classList.remove("is-recording");$("waveform").classList.remove("is-active");$("pauseRecording").disabled=true;$("stopRecording").disabled=true;$("saveRecording").disabled=true;show("home");toast("Grabación cancelada.");});

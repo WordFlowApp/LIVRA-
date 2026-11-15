@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
     private SpeechRecognizer recognizer;
     private TextToSpeech livraTts;
     private volatile boolean livraTtsReady = false;
-    private boolean listening = false;
+    private boolean commandListening = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private android.webkit.PermissionRequest pendingWebPermissionRequest;
     private static final int LIVRA_SAMPLE_RATE = 16000;
@@ -144,8 +144,8 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void discardRecording() { runOnUiThread(() -> discardPendingRecovery()); }
         @JavascriptInterface public void pauseRecording() { livraPaused = true; }
         @JavascriptInterface public void resumeRecording() { livraPaused = false; }
-        @JavascriptInterface public void start() { runOnUiThread(() -> startNativeRecognition()); }
-        @JavascriptInterface public void stop() { runOnUiThread(() -> stopNativeRecognition()); }
+        @JavascriptInterface public void startCommandListening() { runOnUiThread(() -> startNativeRecognition()); }
+        @JavascriptInterface public void stopCommandListening() { runOnUiThread(() -> stopNativeRecognition()); }
         @JavascriptInterface public void speakText(String text) { runOnUiThread(() -> speakNativeText(text)); }
         @JavascriptInterface public void stopSpeech() { runOnUiThread(() -> { if (livraTts != null) livraTts.stop(); }); }
         @JavascriptInterface public void shareBook(String title, String text) { runOnUiThread(() -> shareNativeBook(title, text)); }
@@ -330,40 +330,64 @@ public class MainActivity extends Activity {
     }
 
     private void startNativeRecognition() {
+        if (livraRecording.get() || (livraCaptureThread != null && livraCaptureThread.isAlive())
+                || (livraAudioRecord != null && livraAudioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING)) {
+            sendToPage("commandError", "Primero finalizá o cancelá el dictado. Los comandos usan una sesión de micrófono separada.");
+            return;
+        }
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "LIVRA necesita permiso de micrófono.", Toast.LENGTH_LONG).show();
+            sendToPage("commandError", "mic_permission");
             return;
         }
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            sendToPage("error", "speech_unavailable");
+            sendToPage("commandError", "speech_unavailable");
             return;
         }
-        listening = true;
+        if (commandListening) return;
+
+        // The dictation recognizer is never allowed to overlap the command session.
+        if (recognizer != null) {
+            try { recognizer.cancel(); } catch (Exception ignored) { }
+            try { recognizer.destroy(); } catch (Exception ignored) { }
+            recognizer = null;
+        }
+        commandListening = true;
         beginListeningSession();
     }
 
     private void beginListeningSession() {
-        if (!listening || isFinishing()) return;
+        if (!commandListening || isFinishing()) return;
         try {
-            if (recognizer != null) recognizer.destroy();
             recognizer = SpeechRecognizer.createSpeechRecognizer(this);
             recognizer.setRecognitionListener(new RecognitionListener() {
-                @Override public void onReadyForSpeech(Bundle params) { sendToPage("status", "listening"); }
+                @Override public void onReadyForSpeech(Bundle params) {
+                    if (commandListening) sendToPage("commandStatus", "listening");
+                }
                 @Override public void onBeginningOfSpeech() { }
                 @Override public void onRmsChanged(float rmsdB) { }
                 @Override public void onBufferReceived(byte[] buffer) { }
                 @Override public void onEndOfSpeech() { }
                 @Override public void onError(int error) {
-                    if (listening) handler.postDelayed(() -> { if (listening) beginListeningSession(); }, 400);
+                    if (!commandListening) return;
+                    commandListening = false;
+                    releaseCommandRecognizer();
+                    sendToPage("commandError", String.valueOf(error));
                 }
                 @Override public void onResults(Bundle results) {
+                    if (!commandListening) return;
                     ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                    if (matches != null && !matches.isEmpty()) sendToPage("result", matches.get(0));
-                    if (listening) handler.postDelayed(() -> { if (listening) beginListeningSession(); }, 250);
+                    commandListening = false;
+                    releaseCommandRecognizer();
+                    if (matches != null && !matches.isEmpty() && matches.get(0) != null && !matches.get(0).trim().isEmpty()) {
+                        sendToPage("commandResult", matches.get(0));
+                    } else {
+                        sendToPage("commandError", "no_match");
+                    }
                 }
                 @Override public void onPartialResults(Bundle partialResults) {
+                    if (!commandListening) return;
                     ArrayList<String> matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                    if (matches != null && !matches.isEmpty()) sendToPage("partial", matches.get(0));
+                    if (matches != null && !matches.isEmpty()) sendToPage("commandPartial", matches.get(0));
                 }
                 @Override public void onEvent(int eventType, Bundle params) { }
             });
@@ -375,8 +399,18 @@ public class MainActivity extends Activity {
             intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
             recognizer.startListening(intent);
         } catch (Exception e) {
-            sendToPage("error", "start_failed");
-            if (listening) handler.postDelayed(() -> { if (listening) beginListeningSession(); }, 700);
+            commandListening = false;
+            releaseCommandRecognizer();
+            sendToPage("commandError", "start_failed");
+        }
+    }
+
+    private void releaseCommandRecognizer() {
+        SpeechRecognizer active = recognizer;
+        recognizer = null;
+        if (active != null) {
+            try { active.cancel(); } catch (Exception ignored) { }
+            try { active.destroy(); } catch (Exception ignored) { }
         }
     }
 
@@ -389,6 +423,10 @@ public class MainActivity extends Activity {
             case "speechError": callback = "LIVRAOnNativeSpeechError"; break;
             case "speechPartial": callback = "LIVRAOnNativeSpeechPartial"; break;
             case "speechResult": callback = "LIVRAOnNativeSpeechResult"; break;
+            case "commandStatus": callback = "LIVRAOnNativeCommandStatus"; break;
+            case "commandPartial": callback = "LIVRAOnNativeCommandPartial"; break;
+            case "commandResult": callback = "LIVRAOnNativeCommandResult"; break;
+            case "commandError": callback = "LIVRAOnNativeCommandError"; break;
             case "audioStart": callback = "LIVRAOnNativeAudioStart"; break;
             case "audioChunk": callback = "LIVRAOnNativeAudioChunk"; break;
             case "audioEnd": callback = "LIVRAOnNativeAudioEnd"; break;
@@ -402,13 +440,10 @@ public class MainActivity extends Activity {
     }
 
     private void stopNativeRecognition() {
-        listening = false;
-        handler.removeCallbacksAndMessages(null);
-        if (recognizer != null) {
-            try { recognizer.stopListening(); } catch (Exception ignored) { }
-            recognizer.destroy();
-            recognizer = null;
-        }
+        boolean wasCommandListening = commandListening;
+        commandListening = false;
+        releaseCommandRecognizer();
+        if (wasCommandListening) sendToPage("commandStatus", "stopped");
     }
 
     private void notifyMicPermission(boolean granted) {
