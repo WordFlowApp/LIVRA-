@@ -13,8 +13,8 @@ android {
         // Keep minSdk aligned with the runtime guard in MainActivity until a tested legacy capture path exists.
         minSdk 33
         targetSdk 35
-        versionCode 21
-        versionName '5.1.0'
+        versionCode 22
+        versionName '5.1.1'
     }
 
     compileOptions {
