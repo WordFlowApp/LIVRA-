@@ -67,8 +67,8 @@ jobs:
           assert.match(voiceCommands, /openEditorial/);
           assert.match(activity, /startCommandListening/);
           assert.match(activity, /commandResult/);
-          assert.match(sw, /voice-commands\\.js\\?v=1/);
-          assert.match(sw, /app\\.js\\?v=71/);
+          assert.ok(sw.includes("./voice-commands.js?v=1"));
+          assert.ok(sw.includes("./app.js?v=71"));
           assert.match(sw, /libra-voz-shell-v79/);
           console.log('LIBRA VOZ 5.1.1 voice command bridge checks passed.');
           NODE
